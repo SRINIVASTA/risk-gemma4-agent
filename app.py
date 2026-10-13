@@ -85,7 +85,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "🛠️ Remediation & Actions Console"
 ])
 # ==========================================
-# ─── BLOCK 2: TAB 1 — OPERATIONAL DASHBOARD CORE LOGIC ───
+# ─── TAB 1 BLOCK 1: DATA SIGNAL PROCESSING & VISUALIZATION ───
 # ==========================================
 with tab1:
     st.header("🛡️ Risk & Compliance Monitoring Terminal")
@@ -132,7 +132,9 @@ with tab1:
                 st.plotly_chart(fig, use_container_width=True)
             except Exception as chart_err:
                 st.warning(f"📊 Visualization Layout Notice: {chart_err}. Renders default grid views instead.")
-
+# ==========================================
+# ─── TAB 1 BLOCK 2: RAG EVIDENCE RETRIEVAL & 8-COLUMN PDF GENERATION ───
+# ==========================================
             # RAG Pipeline Execution Window
             st.subheader("🔎 Step 2: Evidence Gathering (Vector Store / RAG)")
             with st.spinner("Querying unstructured regulatory policy frameworks..."):
@@ -197,8 +199,14 @@ with tab1:
                     story.append(Paragraph(summary_text, body_style))
                     story.append(Spacer(1, 10))
                     
-                    # UPGRADED 8-COLUMN COMPLIANCE AUDIT TABLE IN TAB 1
-                    story.append(Paragraph("📊 2. ANALYTICAL AUDIT TRAIL PROFILE", h2_style))
+                    # Section 2 Regulatory Evidence Block
+                    story.append(Paragraph("🔎 2. REGULATORY EVIDENCE RECOVERY FRAMEWORK", h2_style))
+                    evidence_cleaned = evidence.replace("\n", "<br/>")
+                    story.append(Paragraph(evidence_cleaned, body_style))
+                    story.append(Spacer(1, 10))
+                    
+                    # 8-Column Compliance Audit Table Layout Grid
+                    story.append(Paragraph("📊 3. ANALYTICAL AUDIT TRAIL PROFILE", h2_style))
                     table_data = [["TX ID", "ACC ID", "CUSTOMER NAME", "AMOUNT (INR)", "DEST", "RISK %", "KYC", "PEP"]]
                     
                     pdf_target_df = signals_df.head(25) 
