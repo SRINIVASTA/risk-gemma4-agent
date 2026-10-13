@@ -256,13 +256,7 @@ with tab1:
                 except Exception as pdf_err:
                     st.error(f"❌ PDF Assembly Framework Notice: {pdf_err}")
 
-## 💬 BLOCK 3: Tab 2 — Conversational Cortex Room with Unified Context
-This block passes full ledger tracking records, timestamp vectors, and RAG rules into the conversation prompt template using calibrated native Gemma 4 runtime properties.
-
-```python
-# ==========================================
-# ─── BLOCK 3: TAB 2 — CONVERSATIONAL COCO COPILOT ───
-# ==========================================
+# ─── TAB 2: CONVERSATIONAL COCO COPILOT ───
 with tab2:
     st.header("💬 Conversational CoCo Copilot")
     st.caption("Query real-time network liabilities and trace policy intersections interactively using Gemma 4.")
