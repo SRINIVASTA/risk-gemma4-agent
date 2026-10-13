@@ -248,23 +248,27 @@ class FraudCopilotEngine:
             return response.text.replace("[LEDGER_INSERT_MARKER]", markdown_ledger)
             
         except Exception as e:
-            # PORTED FROM COPILOT: Local fail-safe backup handler prevents empty 'None' errors
+            # FORCE PARITY: Dynamically binds the RAG evidence variables into the fallback layout
             fallback_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
                 "## 📌 1. EXECUTIVE SUMMARY\n"
-                f"This official report details systemic suspicious activities and material regulatory breaches identified across multiple corporate accounts. A complete processing of transactional registries revealed **{total_incidents} high-risk incidents** amounting to a total capital exposure of **INR {total_exposure:,}** with an average risk factor of **{avg_risk_factor:.1f}%**. Notably, **{pep_count} entries** involve Politically Exposed Persons (PEPs) matching high-impact auditing criteria. Systemic internal control gaps have permitted out-of-bounds cross-border transfers from restricted 'Pending' and 'Suspended' profiles alongside 48-hour velocity layering maneuvers, requiring immediate system-wide remediation.\n\n"
+                f"This official audit report details material regulatory breaches across financial entity chains. "
+                f"A total of **{total_incidents} signals** were captured with a systemic aggregate capital risk exposure of "
+                f"**INR {total_exposure:,}**. The calculated average network risk factor holds at **{avg_risk_factor:.1f}%**. "
+                f"Immediate security quarantine protocols are recommended.\n\n"
                 "## 📊 2. FLAGGED TRANSACTION LEDGER\n\n"
                 "| Transaction ID | Account ID | Customer Name | Amount (INR) | Destination | Risk Score | KYC Status | PEP Flag |\n"
                 "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
                 f"{markdown_ledger}\n\n"
                 "## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n"
-                "* **Specific Section Broken:** Section 4.1 (High-Value Limits), Section 4.2 (KYC Thresholds) & Section 7.3 (Velocity Structuring)\n"
-                "* **Evidence:** Multiple entries exceed the INR 5,000,000 ceiling to offshore jurisdictions (KY, CH) without enhanced diligence. Furthermore, high-velocity transactions executed within a 48-hour window into multiple disparate offshore nodes match the layering indicators defined under Section 7.3 framework policies.\n\n"
+                f"{evidence}\n\n"
                 "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
-                "- [ ] **Lock Restricted Channels:** Immediately suspend outbound international routing privileges for all 'Pending' and 'Suspended' account references.\n"
-                "- [ ] **Deploy Enhanced Screening:** Mandate immediate source of funds validation and senior management clearance for high-risk profiles holding PEP attributes.\n"
-                "- [ ] **Velocity Containment Hooks:** Freeze outbound rails for any business profiles routing capital to more than one unique international destination inside a 48-hour operational scope.\n"
-                "- [ ] **Regulatory Reporting Escalation:** Fast-track this structured ledger payload into a batch SAR submission package directed to FIU-IND.\n\n"
+                f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents, detailing the identified breaches and capital at risk.\n"
+                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off and explicit source of wealth/funds validation.\n"
+                "- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions, to identify any further non-compliance.\n"
+                "- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status that have initiated cross-border transactions.\n"
+                "- [ ] Review and recalibrate transaction monitoring systems to enhance the detection of velocity structuring (layering activities) as per Section 7.3, focusing on cumulative transaction velocities.\n"
+                "- [ ] Provide mandatory refresher training to all relevant compliance and operations staff on RBI guidelines pertaining to PEPs, high-value cross-border transactions, and KYC compliance.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 "**Review Status:** ⚠️ PENDING HUMAN SIGN-OFF (Fail-Safe Local Mode Activated)"
