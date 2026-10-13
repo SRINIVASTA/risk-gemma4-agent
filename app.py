@@ -58,6 +58,29 @@ min_threshold = st.sidebar.slider(
     on_change=handle_threshold_shift
 )
 
+# ─── 🧠 REASONING ENGINE CONFIGURATION HUB ───
+st.sidebar.markdown("---")
+st.sidebar.header("🧠 Reasoning Engine Layout")
+
+# Map user-friendly dropdown options to strings expected by the Google SDK client
+thinking_options = {
+    "⚡ Minimal (Fastest / Direct)": "minimal",
+    "🟢 Low (Calibrated Balance)": "low",
+    "🟡 Medium (Deep Processing)": "medium",
+    "🔴 High (Full Reasoning Cluster)": "high"
+}
+
+selected_label = st.sidebar.selectbox(
+    "Gemma 4 Thinking Tier:",
+    list(thinking_options.keys()),
+    index=0,  # Defaults to Minimal for optimized immediate response delivery speeds
+    help="Higher tiers activate deep model-level reasoning but increase server processing latency."
+)
+
+# Store the active selected parameter safely in session state memory logs
+st.session_state["active_thinking_level"] = thinking_options[selected_label]
+
+# ─── 📁 DASHBOARD STATE & TAB INITIALIZATION ───
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
