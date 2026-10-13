@@ -250,18 +250,24 @@ class FraudCopilotEngine:
             return response.text.replace("[LEDGER_INSERT_MARKER]", markdown_ledger)
             
         except Exception as e:
-            # Local safety fallback executes instantly if cloud gateway is throttled
+            # FIXED: Added explicit markdown line breaks to fix the layout rendering on Streamlit
             fallback_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
-                "## 📌 1. EXECUTIVE SUMMARY\n"
+                "## 📌 1. EXECUTIVE SUMMARY\n\n"
                 f"This report details a significant aggregation of suspicious activities, encompassing **{total_incidents} flagged incidents** with a total capital exposure of **INR {total_exposure:,}**. The average risk index across these incidents stands at a critical **{avg_risk_factor:.1f}%**, indicating a high probability of illicit financial activity. A particularly concerning aspect is the involvement of **{pep_count} Politically Exposed Persons (PEPs)** in these transactions, significantly elevating the inherent risk profile. These findings point to systemic internal control vulnerabilities and potential breaches of the Prevention of Money Laundering Act (PMLA) and specific RBI directives, particularly concerning enhanced due diligence for high-risk entities, KYC compliance, and the detection of sophisticated layering techniques such as velocity structuring. The substantial capital at risk underscores the urgent need for immediate intervention and robust remediation to mitigate financial crime exposure and ensure regulatory adherence.\n\n"
                 "## 📊 2. FLAGGED TRANSACTION LEDGER\n\n"
+                "| Transaction ID | Account ID | Customer Name | Amount (INR) | Destination | Risk Score | KYC Status | PEP Flag |\n"
+                "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
                 f"{markdown_ledger}\n\n"
-                "## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n"
+                "## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n\n"
                 f"{evidence}\n\n"
-                "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
-                f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents.\n"
-                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved.\n\n"
+                "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n\n"
+                f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents, detailing the identified breaches and capital at risk.\n"
+                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off and explicit source of wealth/funds validation for all associated transactions.\n"
+                f"- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions, to identify any further non-compliance with Section 4.1.\n"
+                f"- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status that have initiated cross-border transactions, ensuring strict adherence to the global system lock mandate of Section 4.2.\n"
+                f"- [ ] Review and recalibrate transaction monitoring systems to enhance the detection of velocity structuring (layering activities) as per Section 7.3, focusing on cumulative transaction velocities.\n"
+                f"- [ ] Provide mandatory refresher training to all relevant compliance and operations staff on RBI guidelines pertaining to PEPs, high-value cross-border transactions, KYC compliance, and the identification of structuring techniques.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 "**Review Status:** ⚠️ PENDING HUMAN SIGN-OFF (Fail-Safe Local Mode Activated)"
