@@ -80,13 +80,6 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📁 Account Directory Lookup",
     "🛠️ Remediation & Actions Console"
 ])
-# Core Dashboard Tab Layout Structure
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Operational Dashboard", 
-    "💬 Conversational CoCo Copilot", 
-    "📁 Account Directory Lookup",
-    "🛠️ Remediation & Actions Console"
-])
 
 # ─── TAB 1: OPERATIONAL DASHBOARD CORE LOGIC ───
 with tab1:
