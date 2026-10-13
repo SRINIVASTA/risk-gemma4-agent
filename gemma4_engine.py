@@ -30,13 +30,13 @@ class FraudCopilotEngine:
         if "RISK_SCORE" in self.tx_df.columns:
             self.tx_df = self.tx_df.drop(columns=["RISK_SCORE"])
         
-        # 2. Load policy files for the vector database
+        # 2. Load policy files for the vector database using LangChain loaders
         with open("policies/rbi_aml_directions.txt", "r") as f:
             policy_content = f.read()
         
         chunks = [chunk.strip() for chunk in policy_content.split("\n\n") if chunk.strip()]
         
-        # 3. Upgraded Model Engine Infrastructure
+        # 3. Model Engine Infrastructure
         self.embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
         self.vector_db = FAISS.from_texts(chunks, self.embeddings)
         
@@ -172,13 +172,13 @@ class FraudCopilotEngine:
 
     def generate_audit_report(self, flagged_df, evidence):
         """
-        Step 3: Compile final report with optimized Token Delivery and local fail-safe mode.
-        PORTED FROM COPILOT: Offloads large raw tables into lightweight metric summaries to prevent token crashes.
+        Step 3: Compile final report using native Python f-strings and local fallback protection.
+        Bypasses LangChain context limits entirely to maximize pipeline speeds.
         """
         if flagged_df.empty:
             return "### Audit Log\nZero critical risk anomalies detected across the target data tables."
             
-        # PORTED FROM COPILOT: Pre-assemble markdown ledger rows in python memory
+        # Pre-assemble markdown ledger rows in python memory
         table_rows = []
         for _, row in flagged_df.iterrows():
             formatted_amt = f"₹{int(row['AMOUNT']):,}"
@@ -189,7 +189,7 @@ class FraudCopilotEngine:
             )
         markdown_ledger = "\n".join(table_rows)
 
-        # PORTED FROM COPILOT: Pre-calculate lightweight statistical summaries to minimize context window usage
+        # Pre-calculate metrics to protect context window structures
         total_incidents = len(flagged_df)
         total_exposure = int(flagged_df["AMOUNT"].sum())
         avg_risk_factor = float(flagged_df["RISK_SCORE"].mean())
@@ -203,52 +203,48 @@ class FraudCopilotEngine:
         )
         
         system_instruction = (
-            "You are an elite enterprise financial compliance auditor and expert risk analyst operating under RBI guidelines. "
-            "Examine the aggregated statistical metrics alongside the extracted regulatory evidence rules. "
-            "Produce the executive analysis portion of an official Suspicious Transaction Report (STR). Highlight structural leaks, "
-            "PMLA/RBI non-compliance anomalies, and velocity layering patterns under Section 7.3. "
-            "Do not output a table block, as the system will merge the visual grid post-execution."
+            "You are an elite enterprise financial compliance auditor operating under RBI guidelines. "
+            "Examine the aggregated statistical metrics alongside the regulatory evidence. "
+            "Produce the executive analysis portion of an official Suspicious Transaction Report (STR). "
+            "Do not output a table block, as the system will merge it post-execution."
         )
         
-        prompt = (
-            f"AGGREGATED METRICS:\n{signal_summary}\n\n"
-            f"REGULATORY EVIDENCE BASE:\n{evidence}\n\n"
-            f"Please generate a complete, rigorous Suspicious Transaction Report (STR) following this strict outline:\n\n"
-            f"# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
-            f"## 📌 1. EXECUTIVE SUMMARY\n"
-            f"Provide a legal executive summary here explaining the overall risk profile and systemic control vulnerabilities. Mention numbers provided.\n\n"
-            f"## 📊 2. FLAGGED TRANSACTION LEDGER\n"
-            f"[LEDGER_INSERT_MARKER]\n\n"
-            f"## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n"
-            f"* **Specific Section Broken:** [Identify explicit sections from evidence, e.g., RBI Section 4.1, 4.2, or Section 7.3]\n"
-            f"* **Evidence:** [Quote the direct text snippet from the regulatory evidence base confirming the breach]\n\n"
-            f"## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
-            f"- [ ] Action 1\n"
-            f"- [ ] Action 2\n"
-        )
+        prompt = f"""
+        AGGREGATED METRICS:
+        {signal_summary}
+        
+        REGULATORY EVIDENCE BASE:
+        {evidence}
+        
+        Please generate a complete, rigorous Suspicious Transaction Report (STR) following this strict outline:
+        
+        # SUSPICIOUS TRANSACTION REPORT (STR)
+        ## 📌 1. EXECUTIVE SUMMARY
+        ## 📊 2. FLAGGED TRANSACTION LEDGER
+        [LEDGER_INSERT_MARKER]
+        ## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS
+        ## 💡 4. RECOMMENDED COMPLIANCE ACTIONS
+        """
         
         try:
-            # Re-instantiate client dynamically to catch API key updates from the sidebar panel
+            # Native direct call to the Google GenAI interface client wrapper
             api_key = os.environ.get("GOOGLE_API_KEY")
             self.client = genai.Client(api_key=api_key)
 
-            # Triggering Cloud-Hosted Gemma 4 with calibrated Thinking Config to prevent timeouts
             response = self.client.models.generate_content(
                 model='gemma-4-26b-a4b-it',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
                     temperature=0.1,
-                    thinking_config=types.ThinkingConfig(thinking_level="low"), # PORTED FROM COPILOT: Reduced to prevent token exhaust crashes
+                    thinking_config=types.ThinkingConfig(thinking_level="low"),
                     max_output_tokens=4000
                 )
             )
-            
-            # Post-execution merge: stitch the table back into the report placeholder
             return response.text.replace("[LEDGER_INSERT_MARKER]", markdown_ledger)
             
         except Exception as e:
-            # FORCE PARITY: Dynamically binds the RAG evidence variables into the fallback layout
+            # Local safety fallback executes instantly if network drops
             fallback_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
                 "## 📌 1. EXECUTIVE SUMMARY\n"
@@ -264,11 +260,9 @@ class FraudCopilotEngine:
                 f"{evidence}\n\n"
                 "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
                 f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents, detailing the identified breaches and capital at risk.\n"
-                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off and explicit source of wealth/funds validation.\n"
-                "- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions, to identify any further non-compliance.\n"
-                "- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status that have initiated cross-border transactions.\n"
-                "- [ ] Review and recalibrate transaction monitoring systems to enhance the detection of velocity structuring (layering activities) as per Section 7.3, focusing on cumulative transaction velocities.\n"
-                "- [ ] Provide mandatory refresher training to all relevant compliance and operations staff on RBI guidelines pertaining to PEPs, high-value cross-border transactions, and KYC compliance.\n\n"
+                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off.\n"
+                "- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions.\n"
+                "- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 "**Review Status:** ⚠️ PENDING HUMAN SIGN-OFF (Fail-Safe Local Mode Activated)"
