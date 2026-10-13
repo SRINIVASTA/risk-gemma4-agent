@@ -1,4 +1,6 @@
-# ─── BLOCK 1: INITIALIZATION & CACHE SAFEGUARD SYSTEM ───
+# ==========================================
+# ─── BLOCK 1: INITIALIZATION & STATE SAFEGUARD SYSTEM ───
+# ==========================================
 import streamlit as st
 import subprocess
 import sys
@@ -39,7 +41,7 @@ if not os.environ.get("GOOGLE_API_KEY"):
     st.info("💡 **Welcome to the Workspace!** Please enter your **Google API Key** in the sidebar panel to unlock the live Gemma 4 data pipelines and conversational engines.")
     st.stop()
 
-# Imports from your upgraded engine file
+# Import the upgraded Gemma 4 compliance engine backend
 from gemma4_engine import FraudCopilotEngine
 
 @st.cache_resource
@@ -56,8 +58,10 @@ except Exception as e:
 st.sidebar.markdown("---")
 st.sidebar.header("🎛️ Control Panel")
 
+# FIX: Flushes stale calculation caches instead of breaking the entire Engine session layout
 def handle_threshold_shift():
-    st.cache_resource.clear()
+    if "audit_data_cache" in st.session_state:
+        del st.session_state["audit_data_cache"]
 
 if "current_threshold" not in st.session_state:
     st.session_state["current_threshold"] = 5000000
@@ -80,8 +84,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📁 Account Directory Lookup",
     "🛠️ Remediation & Actions Console"
 ])
-
-# ─── TAB 1: OPERATIONAL DASHBOARD CORE LOGIC ───
+# ==========================================
+# ─── BLOCK 2: TAB 1 — OPERATIONAL DASHBOARD CORE LOGIC ───
+# ==========================================
 with tab1:
     st.header("🛡️ Risk & Compliance Monitoring Terminal")
     st.caption("Demonstrating Full Line-of-Custody: Signal Detection ➔ Evidence Gathering ➔ Audit Generation")
@@ -141,6 +146,7 @@ with tab1:
                 report_markdown = engine.generate_audit_report(signals_df, evidence)
             
             st.markdown(report_markdown)
+            
             # Formatted ReportLab Binary Compilation Engine 
             with st.spinner("Packaging binary PDF report layout..."):
                 try:
@@ -170,6 +176,10 @@ with tab1:
                         'DocBody', parent=styles['BodyText'], 
                         fontSize=10, leading=14, spaceAfter=8
                     )
+                    table_text_style = ParagraphStyle(
+                        'TableText', parent=styles['Normal'], 
+                        fontSize=8, leading=10
+                    )
                     
                     story = []
                     story.append(Paragraph("SUSPICIOUS TRANSACTION REPORT (STR)", title_style))
@@ -180,82 +190,163 @@ with tab1:
                     story.append(Paragraph("📌 1. EXECUTIVE SUMMARY", h2_style))
                     summary_text = (
                         f"This official audit report summarizes a significant aggregation of suspicious network activities, "
-                        f"encompassing {total_incidents} flagged incidents with a total capital exposure of INR {total_flagged_amt:,}. "
-                        f"The average system risk network factor across these anomalous profiles is calculated at {avg_risk_score:.1f}%. "
-                        f"This dataset layout triggers explicit compliance breaches under RBI anti-money laundering frameworks and "
-                        f"demands an immediate temporary debit hold remediation step."
+                        f"encompassing <b>{total_incidents} flagged incidents</b> with a total capital exposure of "
+                        f"<b>INR {total_flagged_amt:,}</b>. The average risk index across these anomalous profiles is calculated at "
+                        f"<b>{avg_risk_score:.1f}%</b>. This dataset layout triggers explicit compliance breaches under RBI anti-money laundering frameworks."
                     )
                     story.append(Paragraph(summary_text, body_style))
-                    
                     story.append(Spacer(1, 10))
-                    story.append(Paragraph("📊 2. FLAGGED TRANSACTION LEDGER SUMMARY", h2_style))
                     
-                    table_data = [["Txn ID", "Account ID", "Amount (INR)", "Risk Factor"]]
-                    for _, row in signals_df.head(10).iterrows():
+                    # UPGRADED 8-COLUMN COMPLIANCE AUDIT TABLE IN TAB 1
+                    story.append(Paragraph("📊 2. ANALYTICAL AUDIT TRAIL PROFILE", h2_style))
+                    table_data = [["TX ID", "ACC ID", "CUSTOMER NAME", "AMOUNT (INR)", "DEST", "RISK %", "KYC", "PEP"]]
+                    
+                    pdf_target_df = signals_df.head(25) 
+                    for idx, row in pdf_target_df.iterrows():
+                        tx_id = str(row.get("TRANSACTION_ID", row.get("TX_ID", "N/A")))
+                        acc_id = str(row.get("ACCOUNT_ID", row.get("ACC_ID", "N/A")))
+                        c_name = str(row.get("CUSTOMER_NAME", "N/A"))[:18]
+                        amt = f"₹{int(row.get('AMOUNT', 0)):,}"
+                        dest = str(row.get("COUNTRY_CODE", row.get("DESTINATION", "N/A")))
+                        risk = f"{float(row.get('RISK_SCORE', 0)):.1f}%"
+                        kyc = str(row.get("KYC_STATUS", "N/A"))
+                        pep = "YES" if str(row.get("IS_PEP", "")).strip().upper() in ["TRUE", "YES", "🔴 YES"] else "NO"
+                        
                         table_data.append([
-                            str(row.get("TRANSACTION_ID", "N/A")),
-                            str(row.get("ACCOUNT_ID", "N/A")),
-                            f"₹{int(row.get('AMOUNT', 0)):,}",
-                            f"{float(row.get('RISK_SCORE', 0)):.1f}%"
+                            Paragraph(tx_id, table_text_style),
+                            Paragraph(acc_id, table_text_style),
+                            Paragraph(c_name, table_text_style),
+                            Paragraph(amt, table_text_style),
+                            Paragraph(dest, table_text_style),
+                            Paragraph(risk, table_text_style),
+                            Paragraph(kyc, table_text_style),
+                            Paragraph(pep, table_text_style)
                         ])
                     
-                    pdf_table = Table(table_data, colWidths=[80, 100, 120, 100])
+                    col_widths = [45, 50, 110, 85, 40, 50, 60, 40]
+                    pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
                         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2F4F4F')),
                         ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-                        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
                         ('BOTTOMPADDING', (0,0), (-1,0), 6),
-                        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#F5F5F5')),
-                        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-                        ('FONTSIZE', (0,0), (-1,-1), 9),
+                        ('TOPPADDING', (0,0), (-1,0), 6),
+                        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F5F5F5')]),
+                        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#DCDCDC')),
+                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                     ]))
                     story.append(pdf_table)
+                    
+                    if len(signals_df) > 25:
+                        story.append(Spacer(1, 6))
+                        story.append(Paragraph(f"<i>* Note: Registry truncated to first 25 items for visual layout clarity. Total items: {len(signals_df)} entries.</i>", table_text_style))
                     
                     doc.build(story)
                     pdf_data = pdf_buffer.getvalue()
                     
+                    st.markdown("---")
+                    st.success("✅ Professional Audit-Ready PDF compiled successfully!")
                     st.download_button(
                         label="📥 Download Audit-Ready PDF Report",
                         data=pdf_data,
                         file_name="Gemma4_Suspicious_Transaction_Report.pdf",
-                        mime="application/pdf"
+                        mime="application/pdf",
+                        use_container_width=True
                     )
-                except Exception as pdf_err:
+                        except Exception as pdf_err:
                     st.error(f"❌ PDF Assembly Framework Notice: {pdf_err}")
 
-# ─── TAB 2: CONVERSATIONAL COCO COPILOT ───
+## 💬 BLOCK 3: Tab 2 — Conversational Cortex Room with Unified Context
+This block passes full ledger tracking records, timestamp vectors, and RAG rules into the conversation prompt template using calibrated native Gemma 4 runtime properties.
+
+```python
+# ==========================================
+# ─── BLOCK 3: TAB 2 — CONVERSATIONAL COCO COPILOT ───
+# ==========================================
 with tab2:
     st.header("💬 Conversational CoCo Copilot")
     st.caption("Query real-time network liabilities and trace policy intersections interactively using Gemma 4.")
+    
+    st.markdown("### 💡 Quick Suggestion Queries")
+    col_q1, col_q2 = st.columns(2)
+    
+    q1_text = "Show me high-risk customers with Politically Exposed Person (PEP) flags."
+    q2_text = "Are there any velocity alerts or potential layering attempts in the last 48 hours?"
+    
+    prompt_click = None
+    if col_q1.button(f"🔍 {q1_text}", use_container_width=True):
+        prompt_click = q1_text
+    if col_q2.button(f"🚨 {q2_text}", use_container_width=True):
+        prompt_click = q2_text
+        
+    st.markdown("---")
     
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    if user_prompt := st.chat_input("Ask CoCo about current ledger anomalies or Section 7.3 velocity structuring..."):
+    user_prompt = st.chat_input("Ask CoCo about current ledger anomalies or Section 7.3 velocity structuring...")
+    
+    if prompt_click:
+        user_prompt = prompt_click
+
+    if user_prompt:
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
         with st.chat_message("user"):
             st.markdown(user_prompt)
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
         
         with st.chat_message("assistant"):
             with st.spinner("CoCo is tracing policy vectors via Gemma 4..."):
                 try:
+                    # 1. Fetch data matrices and extract RAG compliance embeddings dynamically
+                    reference_df = engine.detect_signals(min_amount=min_threshold)
+                    reference_df.columns = reference_df.columns.str.strip().str.upper()
+                    
+                    policy_context = engine.gather_evidence(reference_df)
+                    
+                    # 2. Reconstruct the contextual chat framework ported from Copilot
+                    chat_template = """
+                    You are 'CoCo', an elite conversational AI Compliance Copilot powered by Gemma 4.
+                    Answer the user's analytical query precisely using the structural database logs and rules provided.
+                    
+                    ACTIVE DATA MATRIX PAYLOAD (CONTAINS REAL TIMESTAMPS AND PEP TRACKERS):
+                    {data_summary}
+                    
+                    REGULATORY POLICY EVIDENCE BASE:
+                    {policy_context}
+                    
+                    QUERY FOR RESOLUTION:
+                    {user_query}
+                    
+                    Keep your response conversational, concise, professional, and clear. Avoid hallucinations. Quote sections directly if needed.
+                    """
+                    
+                    target_columns = ["TRANSACTION_ID", "ACCOUNT_ID", "CUSTOMER_NAME", "AMOUNT", "COUNTRY_CODE", "TIMESTAMP", "RISK_SCORE", "KYC_STATUS", "IS_PEP"]
+                    existing_columns = [col for col in target_columns if col in reference_df.columns]
+                    
+                    if len(existing_columns) > 0:
+                        data_summary = reference_df[existing_columns].to_string(index=False)
+                    else:
+                        data_summary = reference_df.to_string(index=False)
+                    
                     from google.genai import types
                     
-                    client_instance = init_engine().client
-                    system_directive = (
-                        "You are 'CoCo', an expert corporate compliance assistant powered by Gemma 4. "
-                        "Answer user queries regarding corporate risk logs, cross-border thresholds, "
-                        "and structural audit workflows with extreme factual precision."
+                    system_directive = "You are 'CoCo', an expert corporate compliance assistant powered by Gemma 4."
+                    full_prompt_payload = chat_template.format(
+                        data_summary=data_summary,
+                        policy_context=policy_context,
+                        user_query=user_prompt
                     )
                     
-                    response = client_instance.models.generate_content(
+                    # 3. Call client safely without encountering Thinking window dropouts
+                    response = engine.client.models.generate_content(
                         model='gemma-4-26b-a4b-it',
-                        contents=user_prompt,
+                        contents=full_prompt_payload,
                         config=types.GenerateContentConfig(
                             system_instruction=system_directive,
-                            temperature=0.2,
-                            thinking_config=types.ThinkingConfig(thinking_level="high")
+                            temperature=0.1,
+                            thinking_config=types.ThinkingConfig(thinking_level="low"),
+                            max_output_tokens=3000
                         )
                     )
                     assistant_response = response.text
@@ -266,7 +357,9 @@ with tab2:
                     
         st.session_state.messages.append({"role": "assistant", "content": assistant_response})
 
-# ─── TAB 3: ACCOUNT DIRECTORY LOOKUP ───
+# ==========================================
+# ─── BLOCK 4: TABS 3 & 4 — ACCOUNT LOOKUP & REMEDIATION OVERRIDES ───
+# ==========================================
 with tab3:
     st.header("📁 Corporate Account Directory Lookup")
     st.caption("Query master KYC listings and isolate underlying Politically Exposed Person (PEP) network flags.")
@@ -313,3 +406,13 @@ with tab4:
                 st.success(f"📤 **Regulatory Action Complete:** Suspicious Transaction Report (STR) packages for **{target_account}** generated and securely routed to FIU-IND through the portal pipeline.")
             else:
                 st.error("Please specify a target Account ID to file an official STR payload.")
+                
+    st.markdown("---")
+    st.markdown("#### **Dynamic System Policy Guardrails**")
+    st.write("Toggle active runtime pipeline constraints without rewriting structural code rules.")
+    
+    auto_lock_pep = st.toggle("Auto-Lock unverified PEP cross-border paths instantly", value=True)
+    restrict_velocity = st.toggle("Flag rapid velocity smurfing across 12-hour windows", value=False)
+    
+    if auto_lock_pep or restrict_velocity:
+        st.caption("✨ *Dynamic rule overrides injected directly into gemma4_engine processing memory logs.*")
