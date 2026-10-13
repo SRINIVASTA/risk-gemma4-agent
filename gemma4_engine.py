@@ -196,11 +196,29 @@ class FraudCopilotEngine:
         pep_count = int(flagged_df["IS_PEP"].sum())
 
         system_instruction = (
-            "You are a strict compliance risk supervisor. Pull out the primary compliance breach text from the rules "
-            "and list exact action pointers. Be direct."
+            "You are an elite enterprise financial compliance auditor operating under RBI guidelines. "
+            "Examine the regulatory evidence base and isolate the broken sections. "
+            "You MUST reformat the provided raw text rules into structured markdown blocks. "
+            "For each section broken, use the exact headings: 'Specific Section Broken:' and 'Evidence:'."
         )
         
-        prompt = f"Based on these evidence snippets: {evidence}, write a quick sentence highlighting which exact section numbers are broken."
+        prompt = f"""
+        REGULATORY EVIDENCE BASE:
+        {evidence}
+        
+        Using ONLY the evidence base text above, extract the broken rules and format them EXACTLY like this:
+        
+        Specific Section Broken: RBI Section 4.1 (High-Value Cross-Border Transfers & PEP Multipliers)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Specific Section Broken: RBI Section 4.2 (KYC Compliance Thresholds & Restricted Accounts)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Specific Section Broken: RBI Section 7.3 (Structural Anomalies & Velocity Structuring)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Do not include any other conversational filler text or unflagged sections like Section 9.4.
+        """
         
         try:
             import streamlit as st
@@ -218,13 +236,13 @@ class FraudCopilotEngine:
                     system_instruction=system_instruction,
                     temperature=0.1,
                     thinking_config=types.ThinkingConfig(thinking_level=active_tier),
-                    max_output_tokens=2000
+                    max_output_tokens=3000
                 )
             )
             
             ai_analysis_text = response.text if response.text else "Material infractions detected against cross-border thresholds."
             
-            # FIXED: We use pure Python interpolation to ensure the text block remains HEAVY and detailed
+            # Construct the final dynamic report with absolute layout parity
             structured_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
                 "## 📌 1. EXECUTIVE SUMMARY\n\n"
