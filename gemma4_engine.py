@@ -266,7 +266,7 @@ class FraudCopilotEngine:
                 f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off and explicit source of wealth/funds validation for all associated transactions.\n"
                 f"- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions, to identify any further non-compliance with Section 4.1.\n"
                 f"- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status that have initiated cross-border transactions, ensuring strict adherence to the global system lock mandate of Section 4.2.\n"
-                f"- [ ] Review and recalibrate transaction monitoring systems to enhance the detection of velocity structuring (layering activities) as per Section 7.3, focusing on cumulative transaction velocities.\n"
+                f"- [ ] Review and recalibrate transaction monitoring systems to enhance the detection of velocity structuring (layering activities) as per Section 7.3, focusing on cumulative transaction velocities and transfers to disparate offshore entities within a 48-hour window.\n"
                 f"- [ ] Provide mandatory refresher training to all relevant compliance and operations staff on RBI guidelines pertaining to PEPs, high-value cross-border transactions, KYC compliance, and the identification of structuring techniques.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
