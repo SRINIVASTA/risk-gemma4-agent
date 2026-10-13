@@ -163,7 +163,8 @@ with tab1:
                             Paragraph("YES" if str(row.get("IS_PEP", "")).strip().upper() in ["TRUE", "YES"] else "NO", table_text_style)
                         ])
                     
-                    col_widths =
+                    # FIXED: Full 8-column layout dimensions explicitly defined to fix the syntax crash
+                    col_widths = [45, 50, 110, 85, 40, 50, 60, 40]
                     pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
                         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2F4F4F')),
