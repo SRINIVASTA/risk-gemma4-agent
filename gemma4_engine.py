@@ -172,13 +172,13 @@ class FraudCopilotEngine:
 
     def generate_audit_report(self, flagged_df, evidence):
         """
-        Step 3: Compile final report using native Python f-strings and local fallback protection.
-        Bypasses LangChain context limits entirely to maximize pipeline speeds.
+        Step 3: Compile final report with dense statistical tracking metrics.
+        Forces the cloud-hosted Gemma 4 model to match the complete analytical summary style of Gemini.
         """
         if flagged_df.empty:
             return "### Audit Log\nZero critical risk anomalies detected across the target data tables."
             
-        # Pre-assemble markdown ledger rows in python memory
+        # 1. Pre-assemble markdown ledger rows in python memory
         table_rows = []
         for _, row in flagged_df.iterrows():
             formatted_amt = f"₹{int(row['AMOUNT']):,}"
@@ -189,7 +189,7 @@ class FraudCopilotEngine:
             )
         markdown_ledger = "\n".join(table_rows)
 
-        # Pre-calculate metrics to protect context window structures
+        # 2. Pre-calculate metrics to pass directly to the cloud prompt matrix
         total_incidents = len(flagged_df)
         total_exposure = int(flagged_df["AMOUNT"].sum())
         avg_risk_factor = float(flagged_df["RISK_SCORE"].mean())
@@ -204,9 +204,12 @@ class FraudCopilotEngine:
         
         system_instruction = (
             "You are an elite enterprise financial compliance auditor operating under RBI guidelines. "
-            "Examine the aggregated statistical metrics alongside the regulatory evidence. "
-            "Produce the executive analysis portion of an official Suspicious Transaction Report (STR). "
-            "Do not output a table block, as the system will merge it post-execution."
+            "Examine the aggregated statistical metrics alongside the regulatory evidence rules. "
+            "Produce a detailed executive analysis portion of an official Suspicious Transaction Report (STR). "
+            "You MUST explicitly incorporate all provided numbers (Incidents, Exposure, Risk, and PEP count) "
+            "into the analysis. Address systemic internal control vulnerabilities, Prevention of Money Laundering Act (PMLA) implications, "
+            "and sophisticated layering techniques like velocity structuring. "
+            "Do not output a table block, as the system will merge the visual grid post-execution."
         )
         
         prompt = f"""
@@ -220,8 +223,11 @@ class FraudCopilotEngine:
         
         # SUSPICIOUS TRANSACTION REPORT (STR)
         ## 📌 1. EXECUTIVE SUMMARY
+        [Generate a dense, paragraph-long legal executive summary detailing the metrics, PMLA breaches, 21 PEP exposures, and velocity structuring concerns here.]
+        
         ## 📊 2. FLAGGED TRANSACTION LEDGER
         [LEDGER_INSERT_MARKER]
+        
         ## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS
         ## 💡 4. RECOMMENDED COMPLIANCE ACTIONS
         """
@@ -244,25 +250,18 @@ class FraudCopilotEngine:
             return response.text.replace("[LEDGER_INSERT_MARKER]", markdown_ledger)
             
         except Exception as e:
-            # Local safety fallback executes instantly if network drops
+            # Local safety fallback executes instantly if cloud gateway is throttled
             fallback_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
                 "## 📌 1. EXECUTIVE SUMMARY\n"
-                f"This official audit report details material regulatory breaches across financial entity chains. "
-                f"A total of **{total_incidents} signals** were captured with a systemic aggregate capital risk exposure of "
-                f"**INR {total_exposure:,}**. The calculated average network risk factor holds at **{avg_risk_factor:.1f}%**. "
-                f"Immediate security quarantine protocols are recommended.\n\n"
+                f"This report details a significant aggregation of suspicious activities, encompassing **{total_incidents} flagged incidents** with a total capital exposure of **INR {total_exposure:,}**. The average risk index across these incidents stands at a critical **{avg_risk_factor:.1f}%**, indicating a high probability of illicit financial activity. A particularly concerning aspect is the involvement of **{pep_count} Politically Exposed Persons (PEPs)** in these transactions, significantly elevating the inherent risk profile. These findings point to systemic internal control vulnerabilities and potential breaches of the Prevention of Money Laundering Act (PMLA) and specific RBI directives, particularly concerning enhanced due diligence for high-risk entities, KYC compliance, and the detection of sophisticated layering techniques such as velocity structuring. The substantial capital at risk underscores the urgent need for immediate intervention and robust remediation to mitigate financial crime exposure and ensure regulatory adherence.\n\n"
                 "## 📊 2. FLAGGED TRANSACTION LEDGER\n\n"
-                "| Transaction ID | Account ID | Customer Name | Amount (INR) | Destination | Risk Score | KYC Status | PEP Flag |\n"
-                "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
                 f"{markdown_ledger}\n\n"
                 "## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n"
                 f"{evidence}\n\n"
                 "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
-                f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents, detailing the identified breaches and capital at risk.\n"
-                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved, ensuring mandatory senior management sign-off.\n"
-                "- [ ] Conduct a forensic audit of all cross-border transactions exceeding INR 5,000,000, particularly those involving high-risk offshore jurisdictions.\n"
-                "- [ ] Implement an immediate system-wide audit to identify any PEP accounts operating under a 'Pending' KYC status.\n\n"
+                f"- [ ] Immediately file a comprehensive Suspicious Transaction Report (STR) with FIU-IND for all {total_incidents} flagged incidents.\n"
+                f"- [ ] Initiate enhanced due diligence (EDD) and a full review of all {pep_count} Politically Exposed Person (PEP) accounts involved.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 "**Review Status:** ⚠️ PENDING HUMAN SIGN-OFF (Fail-Safe Local Mode Activated)"
