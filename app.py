@@ -253,7 +253,7 @@ with tab1:
                         mime="application/pdf",
                         use_container_width=True
                     )
-                        except Exception as pdf_err:
+                    except Exception as pdf_err:
                     st.error(f"❌ PDF Assembly Framework Notice: {pdf_err}")
 
 ## 💬 BLOCK 3: Tab 2 — Conversational Cortex Room with Unified Context
