@@ -62,7 +62,7 @@ min_threshold = st.sidebar.slider(
 st.sidebar.markdown("---")
 st.sidebar.header("🧠 Reasoning Engine Layout")
 
-# FIXED: Removed mid-tiers and assigned uppercase targets directly to prevent 400 bad requests
+# Map user-friendly dropdown options to UPPERCASE strings expected by the Google SDK client
 thinking_options = {
     "⚡ Minimal (Fastest / Direct)": "MINIMAL",
     "🔴 High (Full Reasoning Cluster)": "HIGH"
@@ -77,6 +77,24 @@ selected_label = st.sidebar.selectbox(
 
 # Store the active selected parameter safely in session state memory logs
 st.session_state["active_thinking_level"] = thinking_options[selected_label]
+
+# ─── 🧹 SYSTEM CACHE RESETS (NEW ADDITION) ───
+st.sidebar.markdown("---")
+st.sidebar.header("⚙️ System Utilities")
+
+if st.sidebar.button("🧹 Clear System Cache & Reset Chat", use_container_width=True, type="secondary"):
+    # 1. Clear native Streamlit resource cache matrices
+    st.cache_resource.clear()
+    
+    # 2. Reset conversation message memory sequences
+    st.session_state.messages = []
+    
+    # 3. Clear transient pipeline data metrics caches
+    if "audit_data_cache" in st.session_state:
+        del st.session_state["audit_data_cache"]
+        
+    st.success("🔄 Session cache cleared successfully!")
+    st.rerun()
 
 # Initialize global conversation memory lists
 if "messages" not in st.session_state:
