@@ -246,11 +246,32 @@ with tab2:
                     reference_df.columns = reference_df.columns.str.strip().str.upper()
                     policy_context = engine.gather_evidence(reference_df)
                     
+                    # 🔍 DYNAMIC SEARCH MATRIX: Scan the user's string input for matches
+                    cleaned_prompt = str(user_prompt).strip().upper()
+                    
+                    # Search across ALL data columns (Accounts, Names, Countries, Statuses, IDs)
+                    matched_mask = (
+                        reference_df['ACCOUNT_ID'].astype(str).str.contains(cleaned_prompt, case=False, na=False) |
+                        reference_df['CUSTOMER_NAME'].astype(str).str.contains(cleaned_prompt, case=False, na=False) |
+                        reference_df['TRANSACTION_ID'].astype(str).str.contains(cleaned_prompt, case=False, na=False) |
+                        reference_df['COUNTRY_CODE'].astype(str).str.contains(cleaned_prompt, case=False, na=False) |
+                        reference_df['KYC_STATUS'].astype(str).str.contains(cleaned_prompt, case=False, na=False)
+                    )
+                    filtered_df = reference_df[matched_mask]
+                    
+                    # 💡 CONTEXT PACKER: 
+                    # If the user asks for a specific account/item, feed ALL its records to the AI.
+                    # If they ask a general question (e.g., "summarize everything"), provide the top 40 rows.
+                    if not filtered_df.empty:
+                        data_matrix_payload = filtered_df[['TRANSACTION_ID', 'ACCOUNT_ID', 'CUSTOMER_NAME', 'AMOUNT', 'COUNTRY_CODE', 'RISK_SCORE', 'KYC_STATUS', 'IS_PEP']].to_string(index=False)
+                    else:
+                        data_matrix_payload = reference_df[['TRANSACTION_ID', 'ACCOUNT_ID', 'CUSTOMER_NAME', 'AMOUNT', 'COUNTRY_CODE', 'RISK_SCORE', 'KYC_STATUS', 'IS_PEP']].head(40).to_string(index=False)
+                    
                     chat_template = f"""
                     You are 'CoCo', an elite conversational AI Compliance Copilot powered by Gemma 4.
                     
-                    ACTIVE DATA MATRIX LOG METRICS:
-                    {reference_df[['TRANSACTION_ID', 'ACCOUNT_ID', 'AMOUNT', 'RISK_SCORE', 'IS_PEP']].head(15).to_string(index=False)}
+                    ACTIVE DATA MATRIX LOG METRICS (FILTERED SPECIFICALLY FOR THE USER QUERY):
+                    {data_matrix_payload}
                     
                     REGULATORY RULE CONTEXT snippets:
                     {policy_context}
@@ -258,10 +279,8 @@ with tab2:
                     User Analytical Query: {user_prompt}
                     """
                     
-                    # FIXED: Read user choice dynamically from sidebar state memory
+                    # Read dynamic tier selection fields securely
                     active_tier = st.session_state.get("active_thinking_level", "MINIMAL")
-                    
-                    # FIXED: Convert target parameter explicitly to UPPERCASE format to satisfy validation loops
                     api_thinking_level = active_tier.upper()
                     
                     from google.genai import types
@@ -269,7 +288,7 @@ with tab2:
                         model='gemma-4-26b-a4b-it',
                         contents=chat_template,
                         config=types.GenerateContentConfig(
-                            system_instruction="You are a professional corporate AML audit helper.",
+                            system_instruction="You are a professional corporate AML audit helper. Speak concisely and format metrics into clear tables.",
                             temperature=0.1,
                             thinking_config=types.ThinkingConfig(thinking_level=api_thinking_level),
                             max_output_tokens=2000
