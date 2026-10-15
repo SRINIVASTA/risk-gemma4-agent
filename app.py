@@ -1,5 +1,5 @@
 # ==========================================
-# ─── APP BLOCK 1: INITIALIZATION & OPERATIONAL TERMINAL (TAB 1) ───
+# ─── APP BLOCK 1: INITIALIZATION & SIDEBAR CONTROLS ───
 # ==========================================
 import streamlit as st
 import os
@@ -62,25 +62,23 @@ min_threshold = st.sidebar.slider(
 st.sidebar.markdown("---")
 st.sidebar.header("🧠 Reasoning Engine Layout")
 
-# Map user-friendly dropdown options to strings expected by the Google SDK client
+# FIXED: Removed mid-tiers and assigned uppercase targets directly to prevent 400 bad requests
 thinking_options = {
-    "⚡ Minimal (Fastest / Direct)": "minimal",
-    "🟢 Low (Calibrated Balance)": "low",
-    "🟡 Medium (Deep Processing)": "medium",
-    "🔴 High (Full Reasoning Cluster)": "high"
+    "⚡ Minimal (Fastest / Direct)": "MINIMAL",
+    "🔴 High (Full Reasoning Cluster)": "HIGH"
 }
 
 selected_label = st.sidebar.selectbox(
     "Gemma 4 Thinking Tier:",
     list(thinking_options.keys()),
-    index=0,  # Defaults to Minimal for optimized immediate response delivery speeds
+    index=0,  
     help="Higher tiers activate deep model-level reasoning but increase server processing latency."
 )
 
 # Store the active selected parameter safely in session state memory logs
 st.session_state["active_thinking_level"] = thinking_options[selected_label]
 
-# ─── 📁 DASHBOARD STATE & TAB INITIALIZATION ───
+# Initialize global conversation memory lists
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -90,7 +88,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📁 Account Directory Lookup",
     "🛠️ Remediation & Actions Console"
 ])
-
+# ==========================================
+# ─── APP BLOCK 2: OPERATIONAL TERMINAL & AUDIT PIPELINE (TAB 1) ───
+# ==========================================
 with tab1:
     st.header("🛡️ Risk & Compliance Monitoring Terminal")
     st.caption("Demonstrating Full Line-of-Custody: Signal Detection ➔ Evidence Gathering ➔ Audit Generation")
@@ -186,7 +186,6 @@ with tab1:
                             Paragraph("YES" if str(row.get("IS_PEP", "")).strip().upper() in ["TRUE", "YES"] else "NO", table_text_style)
                         ])
                     
-                    # FIXED: Full 8-column layout dimensions explicitly defined to fix the syntax crash
                     col_widths = [45, 50, 110, 85, 40, 50, 60, 40]
                     pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
@@ -207,7 +206,7 @@ with tab1:
                 except Exception as pdf_err:
                     st.error(f"❌ PDF Assembly Framework Notice: {pdf_err}")
 # ==========================================
-# ─── APP BLOCK 2: CONVERSATIONAL CHAT (TAB 2), LOOKUP (TAB 3) & REMEDIATION (TAB 4) ───
+# ─── APP BLOCK 3: DYNAMIC CHAT INTEGRATION, LOOKUP & REMEDIATION (TABS 2, 3 & 4) ───
 # ==========================================
 with tab2:
     st.header("💬 Conversational CoCo Copilot")
@@ -229,7 +228,6 @@ with tab2:
                     reference_df.columns = reference_df.columns.str.strip().str.upper()
                     policy_context = engine.gather_evidence(reference_df)
                     
-                    # Core template structured cleanly using pure Python f-strings
                     chat_template = f"""
                     You are 'CoCo', an elite conversational AI Compliance Copilot powered by Gemma 4.
                     
@@ -242,6 +240,12 @@ with tab2:
                     User Analytical Query: {user_prompt}
                     """
                     
+                    # FIXED: Read user choice dynamically from sidebar state memory
+                    active_tier = st.session_state.get("active_thinking_level", "MINIMAL")
+                    
+                    # FIXED: Convert target parameter explicitly to UPPERCASE format to satisfy validation loops
+                    api_thinking_level = active_tier.upper()
+                    
                     from google.genai import types
                     response = engine.client.models.generate_content(
                         model='gemma-4-26b-a4b-it',
@@ -249,7 +253,7 @@ with tab2:
                         config=types.GenerateContentConfig(
                             system_instruction="You are a professional corporate AML audit helper.",
                             temperature=0.1,
-                            thinking_config=types.ThinkingConfig(thinking_level="low"),
+                            thinking_config=types.ThinkingConfig(thinking_level=api_thinking_level),
                             max_output_tokens=2000
                         )
                     )
