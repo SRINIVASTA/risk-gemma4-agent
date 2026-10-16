@@ -1,5 +1,9 @@
 # 🛡️ Risk-Gemma4-Agent Panel
 
+## 📊 Application Workspace Live Preview
+
+![Risk-Gemma4-Agent Dashboard Panel](assets/dashboard_screenshot.png)
+
 An enterprise-grade **Anti-Money Laundering (AML) and Counter-Terrorist Financing (CFT)** risk intelligence dashboard panel. This system couples high-performance automated data processing with deep semantic compliance reasoning via the **Gemma 4 LLM** architecture (`gemma-4-26b-a4b-it`) and **LangChain Vector RAG stores**, adhering strictly to the Reserve Bank of India (RBI) Master KYC Directions.
 
 ## 🏗️ System Architecture & Session Gateway Lifecycle
