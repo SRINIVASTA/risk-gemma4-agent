@@ -2,31 +2,48 @@
 
 An enterprise-grade **Anti-Money Laundering (AML) and Counter-Terrorist Financing (CFT)** risk intelligence dashboard panel. This system couples high-performance automated data processing with deep semantic compliance reasoning via the **Gemma 4 LLM** architecture (`gemma-4-26b-a4b-it`) and **LangChain Vector RAG stores**, adhering strictly to the Reserve Bank of India (RBI) Master KYC Directions.
 
-## 🏗️ System Architecture & Line-of-Custody
+## 🏗️ System Architecture & Session Gateway Lifecycle
 
-The platform is engineered using a modular, decoupled architecture separating stateless analytical data compute layers (`gemma4_engine.py`) from dynamic, role-restricted presentation layers (`app.py` and `tabs/`). 
+The platform is engineered using a modular, decoupled architecture separating stateless analytical data compute layers (`gemma4_engine.py`) from dynamic, role-restricted presentation layers (`app.py` and `tabs/`). The global session management authentication loop is handled persistently through the left sidebar console.
 
 ```mermaid
 graph TD
+    %% Global Session Management Authentication Layer
+    subgraph Sidebar Panel Session Gateway
+        Auth[🔑 sidebar: Enter Gemini API Key] -->|Validates API Key| IAM_Gate{🔐 sidebar: Session Active?}
+        IAM_Gate -->|iam_logged_in == False| Login[🔓 Choose Identity & Click Login]
+        Login -->|Mounts session_state active_iam_user| Workspace_Unlock[🟢 Unlock Authorized Channels]
+        IAM_Gate -->|iam_logged_in == True| Logout[🚪 Click Terminate Session & Logout]
+        Logout -->|Destroys active session_state variable| Auth
+    end
+
+    %% Data Pipeline Integration Core
+    Workspace_Unlock -->|Passes Authorized Profile Mappings| Router{🛡️ app.py Dynamic Tab Router}
+    
     A[Structured Data: Ledger Logs] -->|Pandas Ingest| B(gemma4_engine.py Core)
     A2[policies/rbi_aml_directions.txt] -->|FAISS Vector Store| B
     
+    Router -->|If Role Permitted| Tab1[🔒 tab1_dashboard: Monitoring Terminal]
+    Router -->|If Role Permitted| Tab2[🔒 tab2_gemma4: Conversational Desk]
+    Router -->|If Role Permitted| Tab3[🔒 tab3_registry: Customer 360 Lookup]
+    Router -->|If Role Permitted| Tab4[🔒 tab4_reremediation: Actions Desk]
+    Router -->|If Role Permitted| Tab5[🔐 tab5_iam: Security View Directory]
+
+    %% Stateless Engine Evaluation Flow
+    Tab1 -->|Trigger Analytics Scan Pipeline| B
     subgraph Stateless Reasoning Engine
-        B --> C{Signal Detection}
-        C -->|Section 4.1 / 4.2 Breaks| D[Enhanced Risk Vector]
-        C -->|Section 7.3 Layering| E[48hr Rolling Windows]
-        C -->|Section 9.4 Mule Checks| F[Micro-Velocity Alerts]
+        B --> C{Signal Detection Engine Rules}
+        C -->|Section 4.1 / 4.2 Breaks| D[Enhanced Risk Vector Index]
+        C -->|Section 7.3 Layering| E[48hr Rolling Windows Split Math]
+        C -->|Section 9.4 Mule Checks| F[Low-Value Micro Anomaly Flags]
     end
     
-    B -->|Stateless Payload Query| G[Gemma 4 Model Client Inference]
-    G -->|Raw Text Report Output| H[tabs/ presentation layers]
+    B -->|Stateless Variables Query Payload| G[Gemma 4 Model Client Inference]
+    G -->|Raw Text Report Generation Stream| Tab1
     
-    subgraph Dynamic State UI Shell
-        H --> I[tab1_dashboard: Read-Only Matrix Render]
-        H --> J[tab4_reremediation: State Write Controls]
-    end
-    
-    J -->|Mutates session_state Sign-Off| I
+    %% Dynamic Presentation State Interaction Loop
+    Tab4 -->|Mutates state: report_review_status| Tab1
+    Note over Tab1: Presentation Layer appends live Tab 4 signature footer state before printing report and compiling PDF binary
 ```
 
 ---
@@ -71,9 +88,9 @@ The system simulates a zero-trust financial backoffice terminal with rigid **Rol
 | Identity Profile Registry | Access Role Node | Clearance Hierarchy | Unlocked Workspace Channels | Write Capabilities |
 | :--- | :--- | :--- | :--- | :--- |
 | **Appala Srinivas Tanakala** | `SYSTEM_ADMIN` | Level 4 - Full Access | All 5 Application Tabs | Full provisioning, system parameters configuration, manual overrides, cache clearance. |
-| **Anita Sharma** | `COMPLIANCE_ANALYST` | Level 2 - Intelligence Access | Tabs 1, 2, 3, 4 | Dispatch targeted locks, execute remediation holds, converse with Gemma4 Core. |
-| **Priya Patel** | `SENIOR_AUDITOR` | Level 3 - Audit Review | Tabs 1, 3, 5 (**Read-Only**) | Read data logs, extract ReportLab PDF packages. Tab 5 user-creation is **hidden and write-locked**. |
-| **Rajesh Kumar** | `JUNIOR_CLERK` | Level 1 - Basic Read | Tab 1 Only | Read-only access to main dashboard KPIs. All other panels hidden. |
+| **Anita Sharma** | `COMPLIANCE_ANALYST` | Level 2 - Intelligence Access | Tabs 1, 2, 3, 4, 5 | Full investigation capability, interaction with the AI engine, and containment actions desk. |
+| **Priya Patel** | `SENIOR_AUDITOR` | Level 3 - Audit Review | Tabs 1, 3, 5 | Read data logs, extract ReportLab PDF packages. Tab 5 user-creation form is **completely hidden and write-locked**. |
+| **Rajesh Kumar** | `JUNIOR_CLERK` | Level 1 - Basic Read | Tab 1 Only | Read-only access to main dashboard KPIs. All other panels hidden. Global logout managed via sidebar. |
 
 ---
 
