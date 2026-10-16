@@ -1,5 +1,6 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: CENTRAL ROUTING CORE HUB & LIFECYCLE CONTROLLER
+# ─── PART 1: CORE INITIALIZATION & SESSION REGISTER MANAGEMENT ───────
 # =====================================================================
 import streamlit as st
 import os
@@ -100,7 +101,10 @@ if "remediation_log" not in st.session_state:
     st.session_state["remediation_log"] = pd.DataFrame(columns=[
         "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
     ])
-
+# =====================================================================
+# ─── RISK-GEMMA4-AGENT: CENTRAL ROUTING CORE HUB & LIFECYCLE CONTROLLER
+# ─── PART 2: IAM MOCK REGISTRY & ROLE-BASED ACCESS CONTROL ROUTER ─────
+# =====================================================================
 # ─── 🔐 INITIALIZE IAM REGISTRY MOCK DATA ───
 if "iam_directory" not in st.session_state:
     st.session_state["iam_directory"] = {
@@ -155,7 +159,7 @@ generated_tabs = st.tabs([f"🔒 {t}" if t != "IAM Security & Access Controls" e
 tab_mapping = dict(zip(visible_tabs_list, generated_tabs))
 
 # ─── 📁 MODULAR PANEL INJECTIONS ───
-# 💡 CRITICAL MOUNT FIX: Importing tab4_reremediation matching your exact GitHub repository path string
+# Fixed Mount: References tab4_reremediation exactly to match your GitHub repository file handle name
 from tabs import tab1_dashboard, tab2_gemma4, tab3_registry, tab4_reremediation, tab5_iam
 
 if "Operational Dashboard" in tab_mapping:
