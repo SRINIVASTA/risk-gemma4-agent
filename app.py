@@ -101,7 +101,7 @@ if "remediation_log" not in st.session_state:
         "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
     ])
 
-# ─── 🔐 INITIALIZE IAM REGISTRY MOCK DATA ───
+# ─── 🔐 INITIALIZE IAM REGISTRY MOCK DATA (REBRANDED TO GEMMA4) ───
 if "iam_directory" not in st.session_state:
     st.session_state["iam_directory"] = {
         "admin_srinivas": {
@@ -111,7 +111,7 @@ if "iam_directory" not in st.session_state:
             "dept": "IT Security & Infrastructure", 
             "permitted": ["Unrestricted system access", "Manage IAM users", "Modify clearance levels", "Audit access logs", "System configuration"], 
             "restricted": ["No restrictions; full system access"], 
-            "tabs": ["Operational Dashboard", "Conversational CoCo Copilot", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
+            "tabs": ["Operational Dashboard", "Conversational Gemma4 Copilot", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
         },
         "auditor_priya": {
             "name": "Priya Patel", 
@@ -127,9 +127,9 @@ if "iam_directory" not in st.session_state:
             "role": "COMPLIANCE_ANALYST", 
             "clearance": "Level 2 - Intelligence Access", 
             "dept": "Financial Crime Unit", 
-            "permitted": ["Access Conversational CoCo Copilot", "Query real-time network liabilities", "Lookup Account Directory profiles"], 
+            "permitted": ["Access Conversational Gemma4 Copilot", "Query real-time network liabilities", "Lookup Account Directory profiles"], 
             "restricted": ["Run global compliance infrastructure reports", "Execute remediation holds", "System configuration overrides"], 
-            "tabs": ["Conversational CoCo Copilot", "Account Directory Lookup", "IAM Security & Access Controls"]
+            "tabs": ["Conversational Gemma4 Copilot", "Account Directory Lookup", "IAM Security & Access Controls"]
         },
         "clerk_rajesh": {
             "name": "Rajesh Kumar", 
@@ -137,7 +137,7 @@ if "iam_directory" not in st.session_state:
             "clearance": "Level 1 - Basic Read", 
             "dept": "Operations Backoffice", 
             "permitted": ["Lookup Account Directory entries", "Search master database queries"], 
-            "restricted": ["Run global compliance audits", "Interact with AI CoCo Copilot", "Perform actions or holds", "Manage security matrices"], 
+            "restricted": ["Run global compliance audits", "Interact with AI Gemma4 Copilot", "Perform actions or holds", "Manage security matrices"], 
             "tabs": ["Account Directory Lookup", "IAM Security & Access Controls"]
         }
     }
@@ -154,16 +154,16 @@ visible_tabs_list = user_profile["tabs"]
 generated_tabs = st.tabs([f"🔒 {t}" if t != "IAM Security & Access Controls" else f"🔐 {t}" for t in visible_tabs_list])
 tab_mapping = dict(zip(visible_tabs_list, generated_tabs))
 
-# ─── 📁 MODULAR PANEL INJECTIONS ───
-from tabs import tab1_dashboard, tab2_copilot, tab3_registry, tab4_remediation, tab5_iam
+# ─── 📁 MODULAR PANEL INJECTIONS (FIXED IMPORT TO USE tab2_gemma4) ───
+from tabs import tab1_dashboard, tab2_gemma4, tab3_registry, tab4_remediation, tab5_iam
 
 if "Operational Dashboard" in tab_mapping:
     with tab_mapping["Operational Dashboard"]: 
         tab1_dashboard.render(engine, min_threshold)
 
-if "Conversational CoCo Copilot" in tab_mapping:
-    with tab_mapping["Conversational CoCo Copilot"]: 
-        tab2_copilot.render(engine, min_threshold)
+if "Conversational Gemma4 Copilot" in tab_mapping:
+    with tab_mapping["Conversational Gemma4 Copilot"]: 
+        tab2_gemma4.render(engine, min_threshold)
 
 if "Account Directory Lookup" in tab_mapping:
     with tab_mapping["Account Directory Lookup"]: 
