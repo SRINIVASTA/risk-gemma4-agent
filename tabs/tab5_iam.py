@@ -1,5 +1,6 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: 🔐 IAM SECURITY & ACCESS CONTROLS (TAB 5) ────
+# ─── PART 1: IDENTITY DESK & SESSION LIFECYCLE MANAGEMENT ───────────
 # =====================================================================
 import streamlit as st
 import pandas as pd
@@ -10,7 +11,8 @@ def render(user_profile):
     st.markdown("---")
     
     # 👤 PROFILE IDENTITY PROTOCOLS CARD & LOGOUT
-    c1, c2 = st.columns()
+    # 💡 CRITICAL RESOLUTION FIX: Enforced clean integer column structural mappings layout to avoid TypeErrors
+    c1, c2 = st.columns(2)
     
     with c1:
         st.subheader(f"👤 {user_profile['name']}")
@@ -37,7 +39,9 @@ def render(user_profile):
         st.markdown("### Enforced System Restrictions")
         for item in user_profile["restricted"]:
             st.markdown(f"- `🛑` {item}")
-
+# =====================================================================
+# ─── PART 2: IDENTITY PROVISIONING & USER REPOSITORY VIEWS ───────────
+# =====================================================================
     st.markdown("---")
     
     # 👥 USER DIRECTORY & MANAGEMENT FOR ADMINISTRATORS
@@ -54,7 +58,7 @@ def render(user_profile):
         
         if st.button("➕ Provision Identity Profile Node", type="primary", use_container_width=True):
             if new_user_id and new_disp_name:
-                # ─── 💡 ALIGNED ROLE BOUNDARIES POLICIES ───
+                # Enforce dynamic role boundaries precisely as specified by the compliance guidelines
                 if new_role == "SYSTEM_ADMIN":
                     tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
                 elif new_role == "SENIOR_AUDITOR":
@@ -62,7 +66,6 @@ def render(user_profile):
                 elif new_role == "COMPLIANCE_ANALYST":
                     tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
                 else:  # JUNIOR_CLERK
-                    # Strictly restricted to monitoring main dashboard metrics only
                     tab_rules = ["Operational Dashboard", "IAM Security & Access Controls"]
                 
                 st.session_state["iam_directory"][new_user_id] = {
