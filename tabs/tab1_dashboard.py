@@ -1,3 +1,7 @@
+# =====================================================================
+# ─── RISK-GEMMA4-AGENT: OPERATIONAL MONITIORING PANEL (TAB 1) ────────
+# ─── PART 1: SIGNAL EXPOSURE DETECTION & VISUALISATION GRAPHICS ──────
+# =====================================================================
 import streamlit as st
 import plotly.express as px
 
@@ -27,15 +31,41 @@ def render(engine, min_threshold):
             st.dataframe(signals_df, use_container_width=True)
             
             try:
-                fig = px.bar(signals_df, x="TRANSACTION_ID" if "TRANSACTION_ID" in signals_df.columns else list(signals_df.columns), y="AMOUNT", color="RISK_SCORE", title="Anomalous Transaction Exposure", color_continuous_scale="Reds")
+                fig = px.bar(
+                    signals_df, 
+                    x="TRANSACTION_ID" if "TRANSACTION_ID" in signals_df.columns else list(signals_df.columns), 
+                    y="AMOUNT", 
+                    color="RISK_SCORE", 
+                    title="Anomalous Transaction Exposure", 
+                    color_continuous_scale="Reds"
+                )
                 fig.update_layout(template="plotly_dark")
                 st.plotly_chart(fig, use_container_width=True)
-            except Exception as chart_err: st.warning(f"📊 Visualization Layout Notice: {chart_err}")
-
+            except Exception as chart_err: 
+                st.warning(f"📊 Visualization Layout Notice: {chart_err}")
+# =====================================================================
+# ─── PART 2: EVIDENCE RAG GATHERING & DYNAMIC STATE FOOTER RENDERING ─
+# =====================================================================
             st.subheader("🔎 Step 2: Evidence Gathering (Vector Store / RAG)")
             evidence = engine.gather_evidence(signals_df)
             st.code(evidence, language="text")
             
             st.subheader("📝 Step 3: Audit-Ready Report Generation")
-            report_markdown = engine.generate_audit_report(signals_df, evidence)
-            st.markdown(report_markdown)
+            
+            # Pass the explicit active thinking tier token string directly to the model pipeline
+            active_tier_token = st.session_state.get("active_thinking_level", "MINIMAL")
+            report_markdown = engine.generate_audit_report(signals_df, evidence, active_thinking_level=active_tier_token)
+            
+            # 🚨 LIVE PROTOCOL FIX: Pull the active status dynamically driven by Tab 4 right now!
+            current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF')
+            
+            # Combine the two elements seamlessly in presentation memory
+            final_rendered_view = (
+                f"{report_markdown}\n\n"
+                "---\n"
+                "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
+                f"**Review Status:** {current_signoff}"
+            )
+            
+            # Print the final report to the workspace container layout
+            st.markdown(final_rendered_view)
