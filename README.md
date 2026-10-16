@@ -45,6 +45,9 @@ graph TD
     Tab4 -->|Mutates state: report_review_status| Tab1
     Tab1 -->|Appends Live Tab 4 Signature Footer State| Compile_PDF[📝 Print Report & Compile ReportLab PDF Binary]
 ```
+
+---
+
 ## 🔀 Compliance Pipeline Execution Sequence
 
 The terminal operates on a strict three-step line-of-custody pipeline tracking financial anomalies from signal detection to audit-ready legal documentation:
@@ -75,19 +78,16 @@ sequenceDiagram
     Note over Officer: Presentation layer compiles text report layout + Live Signature Footer
     Engine-->>Officer: Step 3 Complete: Render Final Report & Build ReportLab PDF Binary
 ```
-
----
-
 ## 🔐 Identity & Access Management (IAM) Matrix
 
 The system simulates a zero-trust financial backoffice terminal with rigid **Role-Based Access Control (RBAC)** filters managed from a centralized sidebar login terminal.
 
-| Identity Profile Registry | Access Role Node | Clearance Hierarchy | Unlocked Workspace Channels | Write Capabilities |
+| Identity Profile Registry | Access Role Node | Clearance Hierarchy | Unlocked Workspace Channels | Write Capabilities & Interventions Desk |
 | :--- | :--- | :--- | :--- | :--- |
-| **Appala Srinivas Tanakala** | `SYSTEM_ADMIN` | Level 4 - Full Access | All 5 Application Tabs | Full provisioning, system parameters configuration, manual overrides, cache clearance. |
-| **Anita Sharma** | `COMPLIANCE_ANALYST` | Level 2 - Intelligence Access | Tabs 1, 2, 3, 4, 5 | Full investigation capability, interaction with the AI engine, and containment actions desk. |
+| **Appala Srinivas Tanakala** | `SYSTEM_ADMIN` | Level 4 - Full Access | All 5 Application Tabs | Full provisioning, system parameters configuration, manual overrides, cache clearance, full directory modification. |
+| **Anita Sharma** | `COMPLIANCE_ANALYST` | Level 2 - Intelligence Access | Tabs 1, 2, 3, 4, 5 | Full investigation capability, interaction with the AI engine, and containment actions desk (`ACTIVE_LOCK` / `UNLOCK_ACCOUNT`). |
 | **Priya Patel** | `SENIOR_AUDITOR` | Level 3 - Audit Review | Tabs 1, 3, 5 | Read data logs, extract ReportLab PDF packages. Tab 5 user-creation form is **completely hidden and write-locked**. |
-| **Rajesh Kumar** | `JUNIOR_CLERK` | Level 1 - Basic Read | Tab 1 Only | Read-only access to main dashboard KPIs. All other panels hidden. Global logout managed via sidebar. |
+| **Rajesh Kumar** | `JUNIOR_CLERK` | Level 1 - Basic Read | Tab 1 Only | Read-only access to main dashboard KPIs. All other panels hidden. Global logout managed via sidebar panel. |
 
 ---
 
@@ -97,6 +97,7 @@ The system simulates a zero-trust financial backoffice terminal with rigid **Rol
 2. **Section 4.2 Unverified PEP Lockout:** If an outbound transaction is initiated by a `Pending` KYC account flagged as a Politically Exposed Person (`IS_PEP == True`), the engine overrides standard risk formulas and throws an **Immediate 100% Risk Score System Lock**.
 3. **Section 7.3 Layering Velocity Math:** Groups corporate ledgers dynamically to catch entities executing separate international transaction legs to multiple offshore country codes within a rolling 48-hour window (+25 Risk Index Multiplier).
 4. **Section 9.4 Cyber-Fraud Mule Sweep:** Scans small-scale routing logs down to **₹1,000** on unverified or suspended account nodes to identify micro-smurfing networks, triggering an automated placeholder in the `REMEDIATION_LOG`.
+5. **Bidirectional Containment Controls (Tab 4 Integration):** Provides manual intervention overrides allowing administrative roles to dispatch an `ACTIVE_LOCK` (blocking Tab 3 ledger views) or trigger an `UNLOCK_ACCOUNT` protocol to reset indicators and restore data visibility instantly.
 
 ---
 
@@ -117,7 +118,7 @@ risk-gemma4-agent/
     ├── tab1_dashboard.py   # Run compliance audits, view Plotly graphs, export ReportLab PDFs
     ├── tab2_gemma4.py      # Conversational Gemma4 compliance assistant workspace
     ├── tab3_registry.py    # Customer 360 lookup, tracks active locks, blocks ledger access on active freezes
-    ├── tab4_reremediation.py# Dispatch manual containment protocols, run automated rules loops
+    ├── tab4_reremediation.py# Dispatch manual containment/unlock protocols, run automated rules loops
     └── tab5_iam.py         # IAM security simulation desk (Features write-lock overrides for Auditors)
 ```
 
