@@ -175,6 +175,7 @@ class FraudCopilotEngine:
                     
         return "\n\n".join(evidence_pool)
 
+    # 💡 CRITICAL ARGUMENT SIGNATURE CORRECTION: Accepts third token cleanly to resolve dashboard crashes
     def generate_audit_report(self, flagged_df, evidence, active_thinking_level="MINIMAL"):
         """Step 3: Compile finalized report text completely decoupled from UI runtime state management."""
         if flagged_df.empty:
