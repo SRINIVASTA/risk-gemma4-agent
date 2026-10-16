@@ -1,5 +1,6 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: CORE RISK REASONING & ANALYTICAL PIPELINE ───
+# ─── PART 1: CORE ENGINE SETUP & DATA NORMALISATION ──────────────────
 # =====================================================================
 import os
 import pandas as pd
@@ -110,7 +111,9 @@ class FraudCopilotEngine:
             scores.append(min(score, 100))
             
         return scores
-
+# =====================================================================
+# ─── PART 2: DETECT SIGNALS, RAG EVIDENCE, & STR REPORT GENERATION ───
+# =====================================================================
     def detect_signals(self, min_amount=5000000):
         """Step 1: Signal Detection matching RBI boundaries, Section 7.3 structuring, and Section 9.4 checks."""
         merged = pd.merge(self.tx_df, self.acc_df, on="ACCOUNT_ID")
@@ -202,3 +205,57 @@ class FraudCopilotEngine:
         REGULATORY EVIDENCE BASE:
         {evidence}
         
+        Using ONLY the evidence base text above, extract the broken rules and format them EXACTLY like this:
+        
+        Specific Section Broken: RBI Section 4.1 (High-Value Cross-Border Transfers & PEP Multipliers)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Specific Section Broken: RBI Section 4.2 (KYC Compliance Thresholds & Restricted Accounts)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Specific Section Broken: RBI Section 7.3 (Structural Anomalies & Velocity Structuring)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Specific Section Broken: RBI Section 9.4 (Standard Operating Procedure for Suspected Money Mule Accounts)
+        Evidence: [Quote the exact text snippet from the text above]
+        
+        Do not include any other conversational filler text or unflagged sections.
+        """
+        
+        try:
+            # Safe clean parsing delivery to accommodate SDK parameters
+            active_tier_str = str(active_thinking_level).upper()
+            
+            response = self.client.models.generate_content(
+                model='gemma-4-26b-a4b-it',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.1,
+                    thinking_config=types.ThinkingConfig(thinking_level=active_tier_str),
+                    max_output_tokens=3000
+                )
+            )
+            
+            ai_analysis_text = response.text if response.text else "Material infractions detected against regulatory boundaries."
+            
+            structured_report = (
+                "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
+                "## 📌 1. EXECUTIVE SUMMARY\n\n"
+                f"This report details a significant aggregation of suspicious activities, encompassing **{total_incidents} flagged incidents** with a total capital exposure of **INR {total_exposure:,}**. The average risk index stands at **{avg_risk_factor:.1f}%**. Notably, this evaluation incorporates the newly active Section 9.4 Cyber Fraud frameworks to catch small-scale money mule routing vectors alongside high-value cross-border structuring paths.\n\n"
+                "## 📊 2. FLAGGED TRANSACTION LEDGER\n\n"
+                "| Transaction ID | Account ID | Customer Name | Amount (INR) | Destination | Risk Score | KYC Status | PEP Flag |\n"
+                "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+                f"{markdown_ledger}\n\n"
+                "## 🔎 3. REGULATORY COMPLIANCE BREACH ANALYSIS\n\n"
+                f"{ai_analysis_text}\n\n"
+                "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n\n"
+                f"- [ ] Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.\n"
+                f"- [ ] Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.\n"
+                f"- [ ] Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within 30 days for confirmed mule identities.\n"
+                f"- [ ] Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers."
+            )
+            return structured_report
+            
+        except Exception as e:
+            return f"❌ Native Engine Extraction Drop: {str(e)}"
