@@ -101,7 +101,7 @@ if "remediation_log" not in st.session_state:
         "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
     ])
 
-# ─── 🔐 INITIALIZE IAM REGISTRY MOCK DATA (FULLY REFACETORED TO CONVERSATIONAL GEMMA4) ───
+# ─── 🔐 INITIALIZE IAM REGISTRY MOCK DATA ───
 if "iam_directory" not in st.session_state:
     st.session_state["iam_directory"] = {
         "admin_srinivas": {
@@ -155,7 +155,8 @@ generated_tabs = st.tabs([f"🔒 {t}" if t != "IAM Security & Access Controls" e
 tab_mapping = dict(zip(visible_tabs_list, generated_tabs))
 
 # ─── 📁 MODULAR PANEL INJECTIONS ───
-from tabs import tab1_dashboard, tab2_gemma4, tab3_registry, tab4_remediation, tab5_iam
+# 💡 CRITICAL MOUNT FIX: Importing tab4_reremediation matching your exact GitHub repository path string
+from tabs import tab1_dashboard, tab2_gemma4, tab3_registry, tab4_reremediation, tab5_iam
 
 if "Operational Dashboard" in tab_mapping:
     with tab_mapping["Operational Dashboard"]: 
@@ -171,7 +172,7 @@ if "Account Directory Lookup" in tab_mapping:
 
 if "Remediation & Actions Console" in tab_mapping:
     with tab_mapping["Remediation & Actions Console"]: 
-        tab4_remediation.render(engine)
+        tab4_reremediation.render(engine)
 
 if "IAM Security & Access Controls" in tab_mapping:
     with tab_mapping["IAM Security & Access Controls"]: 
