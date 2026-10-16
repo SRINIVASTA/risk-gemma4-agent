@@ -1,5 +1,5 @@
 # =====================================================================
-# ─── RISK-GEMMA4-AGENT: OPERATIONAL MONITIORING PANEL (TAB 1) ────────
+# ─── RISK-GEMMA4-AGENT: OPERATIONAL MONITORING PANEL (TAB 1) ─────────
 # ─── PART 1: SIGNAL EXPOSURE DETECTION & VISUALISATION GRAPHICS ──────
 # =====================================================================
 import streamlit as st
@@ -44,7 +44,7 @@ def render(engine, min_threshold):
             except Exception as chart_err: 
                 st.warning(f"📊 Visualization Layout Notice: {chart_err}")
 # =====================================================================
-# ─── PART 2: EVIDENCE RAG GATHERING & DYNAMIC STATE FOOTER RENDERING ─
+# ─── PART 2: EVIDENCE RAG GATHERING & POSITION-SAFE INFRASTRUCTURE ───
 # =====================================================================
             st.subheader("🔎 Step 2: Evidence Gathering (Vector Store / RAG)")
             evidence = engine.gather_evidence(signals_df)
@@ -52,14 +52,16 @@ def render(engine, min_threshold):
             
             st.subheader("📝 Step 3: Audit-Ready Report Generation")
             
-            # Pass the explicit active thinking tier token string directly to the model pipeline
+            # Fetch active configuration thinking state matrix
             active_tier_token = st.session_state.get("active_thinking_level", "MINIMAL")
-            report_markdown = engine.generate_audit_report(signals_df, evidence, active_thinking_level=active_tier_token)
             
-            # 🚨 LIVE PROTOCOL FIX: Pull the active status dynamically driven by Tab 4 right now!
+            # 🚨 FIX: Pass argument safely as a direct positional token parameter to ensure it matches the engine blueprint footprint perfectly
+            report_markdown = engine.generate_audit_report(signals_df, evidence, active_tier_token)
+            
+            # 🛡️ THE PRESENTATION LAYER MANAGES STATE ASSEMBLY AND RENDERING HERE
             current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF')
             
-            # Combine the two elements seamlessly in presentation memory
+            # Append the dynamic tracking operational signature footer cleanly
             final_rendered_view = (
                 f"{report_markdown}\n\n"
                 "---\n"
@@ -67,5 +69,5 @@ def render(engine, min_threshold):
                 f"**Review Status:** {current_signoff}"
             )
             
-            # Print the final report to the workspace container layout
+            # Render out to target screen canvas components
             st.markdown(final_rendered_view)
