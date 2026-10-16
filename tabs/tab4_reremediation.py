@@ -1,3 +1,7 @@
+# =====================================================================
+# ─── RISK-GEMMA4-AGENT: 🛡️ REMEDIATION & ACTIONS CONSOLE (TAB 4) ─────
+# ─── PART 1: TARGET CONTAINMENT DESK & INTERACTIVE UNLOCK MATRIX ─────
+# =====================================================================
 import streamlit as st
 import pandas as pd
 
@@ -6,26 +10,62 @@ def render(engine):
     st.caption("Active Incident Response Core Routing - Updates the REMEDIATION_LOG Table Natively")
     st.markdown("---")
     
+    # 🎯 TARGETED ACCOUNT CONTAINMENT PROTOCOLS
     st.subheader("🎯 Targeted Account Containment Protocols")
     c1, c2 = st.columns(2)
-    with c1: target_account = st.selectbox("Select Target Profile to Contain:", sorted(engine.acc_df["ACCOUNT_ID"].unique()))
-    with c2: selected_protocol = st.selectbox("Select Mitigation Protocol to Enforce:", ["ACTIVE_LOCK", "ENHANCED_EDD", "DEBIT_HOLD_60_DAYS"])
+    
+    with c1: 
+        # Sort and select target customer keys from master database file records
+        target_account = st.selectbox("Select Target Profile to Contain / Release:", sorted(engine.acc_df["ACCOUNT_ID"].unique()))
+    
+    with c2: 
+        # 💡 CRITICAL RESOLUTION: Added UNLOCK_ACCOUNT protocol parameter to the operation matrices array
+        selected_protocol = st.selectbox(
+            "Select Mitigation Protocol to Enforce:", 
+            ["ACTIVE_LOCK", "UNLOCK_ACCOUNT", "ENHANCED_EDD", "DEBIT_HOLD_60_DAYS"]
+        )
         
     if st.button("🚨 Dispatch Mitigation Protocol", type="primary", use_container_width=True):
         cust_name = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["CUSTOMER_NAME"].values[0]
-        new_log = {"TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), "ACCOUNT_ID": target_account, "CUSTOMER_NAME": cust_name, "ENFORCED_PROTOCOL": selected_protocol, "TRIGGER_RULE": "MANUAL_CONTAINMENT_DESK", "STATUS": "ACTIVE_ENFORCED"}
+        
+        # Determine log parameters based on chosen action protocol routing rules
+        trigger_rule_label = "MANUAL_CONTAINMENT_DESK" if selected_protocol != "UNLOCK_ACCOUNT" else "MANUAL_RELEASE_DESK"
+        enforcement_status = "ACTIVE_ENFORCED" if selected_protocol != "UNLOCK_ACCOUNT" else "RELEASE_LOG_CLEAR"
+        
+        new_log = {
+            "TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), 
+            "ACCOUNT_ID": target_account, 
+            "CUSTOMER_NAME": cust_name, 
+            "ENFORCED_PROTOCOL": selected_protocol, 
+            "TRIGGER_RULE": trigger_rule_label, 
+            "STATUS": enforcement_status
+        }
+        
+        # Append mitigation protocol logs natively to the system session dataframes
         st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
-        st.warning(f"🔒 Dispatched `{selected_protocol}` containment to **{target_account}**.")
+        
+        if selected_protocol == "UNLOCK_ACCOUNT":
+            st.success(f"🔓 **Incident Response Release Active:** Unlocked account **{target_account}** ({cust_name}) and cleared active containment flags.")
+        else:
+            st.warning(f"🔒 **Incident Response Isolation Active:** Dispatched `{selected_protocol}` containment to **{target_account}**.")
+            
         st.rerun()
-
+# =====================================================================
+# ─── PART 2: REGULATORY SIGN-OFFS & AUTOMATED ENGNE SCAN LOOPS ───────
+# =====================================================================
     st.markdown("---")
     st.subheader("📋 Regulatory Export & Core Controls")
     ae1, ae2 = st.columns(2)
     with ae1:
-        if st.button("📤 Export Compliance Package & File STR to FIU-IND Portal", use_container_width=True): st.success("📤 Routed to FIU-IND gateways.")
+        if st.button("📤 Export Compliance Package & File STR to FIU-IND Portal", use_container_width=True): 
+            st.success("📤 Routed to FIU-IND gateways successfully.")
     with ae2:
-        if st.button(f"📝 Sign-Off Global STR Audit Report ({st.session_state.report_review_status})", use_container_width=True):
-            st.session_state["report_review_status"] = "🟢 APPROVED & SIGNED OFF"
+        current_review_val = st.session_state.get("report_review_status", "⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER")
+        if st.button(f"📝 Toggle Status (Current: {current_review_val})", use_container_width=True):
+            if "PENDING" in current_review_val:
+                st.session_state["report_review_status"] = "🟢 APPROVED & SIGNED OFF BY COMPLIANCE OFFICER"
+            else:
+                st.session_state["report_review_status"] = "⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER"
             st.success("Authorized successfully!"); st.rerun()
 
     st.markdown("---")
