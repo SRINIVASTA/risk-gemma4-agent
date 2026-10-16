@@ -1,6 +1,5 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: 🔐 IAM SECURITY & ACCESS CONTROLS (TAB 5) ────
-# ─── PART 1: IDENTITY DESK & SESSION LIFECYCLE MANAGEMENT ───────────
 # =====================================================================
 import streamlit as st
 import pandas as pd
@@ -10,23 +9,13 @@ def render(user_profile):
     st.caption("Role-Based Authentication Simulation - Powered by IDENTITY_ACCESS_MASTER")
     st.markdown("---")
     
-    # 👤 PROFILE IDENTITY PROTOCOLS CARD & LOGOUT
-    # 💡 CRITICAL RESOLUTION FIX: Enforced clean integer column structural mappings layout to avoid TypeErrors
-    c1, c2 = st.columns(2)
+    # 👤 PROFILE IDENTITY PROTOCOLS CARD
+    st.subheader(f"👤 Active Profile Node: {user_profile['name']}")
+    st.markdown(f"**Role Registry:** `{user_profile['role']}` &nbsp;|&nbsp; **Clearance Level:** `{user_profile['clearance']}` &nbsp;|&nbsp; **Department Node:** `{user_profile['dept']}`")
     
-    with c1:
-        st.subheader(f"👤 {user_profile['name']}")
-        st.markdown(f"**Role:** `{user_profile['role']}` &nbsp;|&nbsp; **Clearance:** `{user_profile['clearance']}` &nbsp;|&nbsp; **Department:** `{user_profile['dept']}`")
-        st.markdown("📂 **Accessible Dashboard Workspace Channels:**")
-        st.info(", ".join([f"[{t}]" for t in user_profile['tabs']]))
+    st.markdown("📂 **Accessible Dashboard Workspace Channels:**")
+    st.info(", ".join([f"[{t}]" for t in user_profile['tabs']]))
         
-    with c2:
-        st.markdown("### Session Management")
-        if st.button("🚪 Terminate Session & Logout", type="secondary", use_container_width=True):
-            st.session_state["iam_logged_in"] = False
-            st.warning("Session destroyed successfully.")
-            st.rerun()
-
     st.markdown("---")
     
     # PERMISSIONS SUMMARY GRID
@@ -39,9 +28,7 @@ def render(user_profile):
         st.markdown("### Enforced System Restrictions")
         for item in user_profile["restricted"]:
             st.markdown(f"- `🛑` {item}")
-# =====================================================================
-# ─── PART 2: IDENTITY PROVISIONING & USER REPOSITORY VIEWS ───────────
-# =====================================================================
+
     st.markdown("---")
     
     # 👥 USER DIRECTORY & MANAGEMENT FOR ADMINISTRATORS
@@ -58,7 +45,7 @@ def render(user_profile):
         
         if st.button("➕ Provision Identity Profile Node", type="primary", use_container_width=True):
             if new_user_id and new_disp_name:
-                # Enforce dynamic role boundaries precisely as specified by the compliance guidelines
+                # Enforce rigid role boundaries exactly matching the updated core router constraints
                 if new_role == "SYSTEM_ADMIN":
                     tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
                 elif new_role == "SENIOR_AUDITOR":
@@ -66,7 +53,7 @@ def render(user_profile):
                 elif new_role == "COMPLIANCE_ANALYST":
                     tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
                 else:  # JUNIOR_CLERK
-                    tab_rules = ["Operational Dashboard", "IAM Security & Access Controls"]
+                    tab_rules = ["Operational Dashboard"]
                 
                 st.session_state["iam_directory"][new_user_id] = {
                     "name": new_disp_name, "role": new_role, "clearance": new_clearance.replace("_", " ").title(), "dept": new_dept,
