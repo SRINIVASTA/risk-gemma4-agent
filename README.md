@@ -43,11 +43,8 @@ graph TD
     
     %% Dynamic Presentation State Interaction Loop
     Tab4 -->|Mutates state: report_review_status| Tab1
-    Note over Tab1: Presentation Layer appends live Tab 4 signature footer state before printing report and compiling PDF binary
+    Tab1 -->|Appends Live Tab 4 Signature Footer State| Compile_PDF[📝 Print Report & Compile ReportLab PDF Binary]
 ```
-
----
-
 ## 🔀 Compliance Pipeline Execution Sequence
 
 The terminal operates on a strict three-step line-of-custody pipeline tracking financial anomalies from signal detection to audit-ready legal documentation:
