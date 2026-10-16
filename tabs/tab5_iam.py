@@ -1,5 +1,6 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: 🔐 IAM SECURITY & ACCESS CONTROLS (TAB 5) ────
+# ─── PART 1: IDENTITY DESK & READ-ONLY ACCESS CONTROLS ───────────────
 # =====================================================================
 import streamlit as st
 import pandas as pd
@@ -28,42 +29,49 @@ def render(user_profile):
         st.markdown("### Enforced System Restrictions")
         for item in user_profile["restricted"]:
             st.markdown(f"- `🛑` {item}")
-
+# =====================================================================
+# ─── PART 2: DYNAMIC PROVISIONING HUB & ACTION WRITE-LOCK PROTOCOLS ──
+# =====================================================================
     st.markdown("---")
-    
-    # 👥 USER DIRECTORY & MANAGEMENT FOR ADMINISTRATORS
     st.subheader("👥 User Directory & Management Dashboard")
+    
     m1, m2 = st.columns(2)
     
     with m1:
-        st.markdown("### ➕ Add New User Profile")
-        new_user_id = st.text_input("Username / Unique ID", placeholder="e.g., clerk_suresh")
-        new_disp_name = st.text_input("Display Name", placeholder="e.g., Suresh Kumar")
-        new_role = st.selectbox("Access Role Mappings Profile:", ["SYSTEM_ADMIN", "SENIOR_AUDITOR", "COMPLIANCE_ANALYST", "JUNIOR_CLERK"], index=3)
-        new_clearance = st.selectbox("Clearance Assignment Matrix:", ["L4_FULL_ACCESS", "L3_AUDIT_REVIEW", "L2_INTEL_ACCESS", "L1_BASIC"], index=3)
-        new_dept = st.text_input("Department Node Link", value="Operations Backoffice")
-        
-        if st.button("➕ Provision Identity Profile Node", type="primary", use_container_width=True):
-            if new_user_id and new_disp_name:
-                # Enforce rigid role boundaries exactly matching the updated core router constraints
-                if new_role == "SYSTEM_ADMIN":
-                    tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
-                elif new_role == "SENIOR_AUDITOR":
-                    tab_rules = ["Operational Dashboard", "Account Directory Lookup", "IAM Security & Access Controls"]
-                elif new_role == "COMPLIANCE_ANALYST":
-                    tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
-                else:  # JUNIOR_CLERK
-                    tab_rules = ["Operational Dashboard"]
-                
-                st.session_state["iam_directory"][new_user_id] = {
-                    "name": new_disp_name, "role": new_role, "clearance": new_clearance.replace("_", " ").title(), "dept": new_dept,
-                    "permitted": ["Assigned by Role Mapping Policy Core"], "restricted": ["Elevated elements restricted by policy hierarchy"],
-                    "tabs": tab_rules
-                }
-                st.success(f"Identity context provisioned for {new_disp_name}!")
-                st.rerun()
-            else:
-                st.error("Username and Display Name metrics are required.")
+        # 🔒 CRITICAL SECURITY LOCK: Grant write access ONLY to the System Administrator
+        if user_profile['role'] == "SYSTEM_ADMIN":
+            st.markdown("### ➕ Add New User Profile")
+            new_user_id = st.text_input("Username / Unique ID", placeholder="e.g., clerk_suresh")
+            new_disp_name = st.text_input("Display Name", placeholder="e.g., Suresh Kumar")
+            new_role = st.selectbox("Access Role Mappings Profile:", ["SYSTEM_ADMIN", "SENIOR_AUDITOR", "COMPLIANCE_ANALYST", "JUNIOR_CLERK"], index=3)
+            new_clearance = st.selectbox("Clearance Assignment Matrix:", ["L4_FULL_ACCESS", "L3_AUDIT_REVIEW", "L2_INTEL_ACCESS", "L1_BASIC"], index=3)
+            new_dept = st.text_input("Department Node Link", value="Operations Backoffice")
+            
+            if st.button("➕ Provision Identity Profile Node", type="primary", use_container_width=True):
+                if new_user_id and new_disp_name:
+                    if new_role == "SYSTEM_ADMIN":
+                        tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
+                    elif new_role == "SENIOR_AUDITOR":
+                        tab_rules = ["Operational Dashboard", "Account Directory Lookup", "IAM Security & Access Controls"]
+                    elif new_role == "COMPLIANCE_ANALYST":
+                        tab_rules = ["Operational Dashboard", "Conversational Gemma4", "Account Directory Lookup", "Remediation & Actions Console", "IAM Security & Access Controls"]
+                    else:  # JUNIOR_CLERK
+                        tab_rules = ["Operational Dashboard"]
+                    
+                    st.session_state["iam_directory"][new_user_id] = {
+                        "name": new_disp_name, "role": new_role, "clearance": new_clearance.replace("_", " ").title(), "dept": new_dept,
+                        "permitted": ["Assigned by Role Mapping Policy Core"], "restricted": ["Elevated elements restricted by policy hierarchy"],
+                        "tabs": tab_rules
+                    }
+                    st.success(f"Identity context provisioned for {new_disp_name}!")
+                    st.rerun()
+                else:
+                    st.error("Username and Display Name metrics are required.")
+        else:
+            # 🛑 READ-ONLY ENFORCEMENT NOTICE FOR AUDITORS & CLERKS
+            st.markdown("### ➕ User Provisioning Desk")
+            st.warning("🛡️ **Read-Only Access Enforced:** Your active role profile does not possess write privileges to modify identity directories, provision new system nodes, or alter clearance configurations.")
+            st.info("💡 *Audit Trail Rule: Auditors can examine the active directory entries table in the right-hand panel to verify user permissions lineage, but changes require a SYSTEM_ADMIN credential token override.*")
 
     with m2:
         st.markdown("### 🔄 Active Identity Profile Index")
