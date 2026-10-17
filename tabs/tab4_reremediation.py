@@ -10,6 +10,12 @@ def render(engine):
     st.caption("Active Incident Response Core Routing - Updates the REMEDIATION_LOG Table Natively")
     st.markdown("---")
     
+    # Ensure remediation_log state is initialized immediately at the top of rendering
+    if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
+        st.session_state["remediation_log"] = pd.DataFrame(columns=[
+            "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
+        ])
+    
     # 🎯 TARGETED ACCOUNT CONTAINMENT PROTOCOLS
     st.subheader("🎯 Targeted Account Containment Protocols")
     c1, c2 = st.columns(2)
@@ -28,30 +34,40 @@ def render(engine):
     if st.button("🚨 Dispatch Mitigation Protocol", type="primary", use_container_width=True):
         cust_name = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["CUSTOMER_NAME"].values[0]
         
-        # Determine log parameters based on chosen action protocol routing rules
-        trigger_rule_label = "MANUAL_CONTAINMENT_DESK" if selected_protocol != "UNLOCK_ACCOUNT" else "MANUAL_RELEASE_DESK"
-        enforcement_status = "ACTIVE_ENFORCED" if selected_protocol != "UNLOCK_ACCOUNT" else "RELEASE_LOG_CLEAR"
-        
-        new_log = {
-            "TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), 
-            "ACCOUNT_ID": target_account, 
-            "CUSTOMER_NAME": cust_name, 
-            "ENFORCED_PROTOCOL": selected_protocol, 
-            "TRIGGER_RULE": trigger_rule_label, 
-            "STATUS": enforcement_status
-        }
-        
-        # Append mitigation protocol logs natively to the system session dataframes
-        st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
-        
-        if selected_protocol == "UNLOCK_ACCOUNT":
-            st.success(f"🔓 **Incident Response Release Active:** Unlocked account **{target_account}** ({cust_name}) and cleared active containment flags.")
+        # 🛡️ CLEANUP OPTIMIZATION: Check for existing identical active locks to prevent duplicate row spam
+        existing_logs = st.session_state["remediation_log"]
+        duplicate_check = (existing_logs["ACCOUNT_ID"] == target_account) & \
+                          (existing_logs["ENFORCED_PROTOCOL"] == selected_protocol) & \
+                          (existing_logs["STATUS"] == "ACTIVE_ENFORCED")
+                          
+        if duplicate_check.any() and selected_protocol != "UNLOCK_ACCOUNT":
+            st.error(f"⚠️ **Operational Lock Blocked:** Protocol `{selected_protocol}` is already actively enforced on account **{target_account}** ({cust_name}).")
         else:
-            st.warning(f"🔒 **Incident Response Isolation Active:** Dispatched `{selected_protocol}` containment to **{target_account}**.")
+            # Determine log parameters based on chosen action protocol routing rules
+            trigger_rule_label = "MANUAL_CONTAINMENT_DESK" if selected_protocol != "UNLOCK_ACCOUNT" else "MANUAL_RELEASE_DESK"
+            enforcement_status = "ACTIVE_ENFORCED" if selected_protocol != "UNLOCK_ACCOUNT" else "RELEASE_LOG_CLEAR"
             
-        st.rerun()
+            new_log = {
+                "TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), 
+                "ACCOUNT_ID": target_account, 
+                "CUSTOMER_NAME": cust_name, 
+                "ENFORCED_PROTOCOL": selected_protocol, 
+                "TRIGGER_RULE": trigger_rule_label, 
+                "STATUS": enforcement_status
+            }
+            
+            # Append mitigation protocol logs natively to the system session dataframes
+            st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
+            
+            if selected_protocol == "UNLOCK_ACCOUNT":
+                st.success(f"🔓 **Incident Response Release Active:** Unlocked account **{target_account}** ({cust_name}) and cleared active containment flags.")
+            else:
+                st.warning(f"🔒 **Incident Response Isolation Active:** Dispatched `{selected_protocol}` containment to **{target_account}**.")
+                
+            st.rerun()
+
 # =====================================================================
-# ─── PART 2: REGULATORY SIGN-OFFS & AUTOMATED ENGNE SCAN LOOPS ───────
+# ─── PART 2: REGULATORY SIGN-OFFS & AUTOMATED ENGINE SCAN LOOPS ───────
 # =====================================================================
     st.markdown("---")
     st.subheader("📋 Regulatory Export & Core Controls")
@@ -80,7 +96,7 @@ def render(engine):
         for _, row in merged_ledger.iterrows():
             if row["COUNTRY_CODE"] in ["KP", "IR", "SY", "MM"]:
                 new_violations.append({"TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), "ACCOUNT_ID": row["ACCOUNT_ID"], "CUSTOMER_NAME": row["CUSTOMER_NAME"], "ENFORCED_PROTOCOL": "ACTIVE_LOCK", "TRIGGER_RULE": "RULE_1_SANCTION_VIOLATION", "STATUS": "AUTO_ENFORCED"})
-            if row.get("IS_PEP") == True and row["COUNTRY_CODE"] in ["KY", "CH"]:
+            if (str(row.get("IS_PEP")).strip().upper() == "TRUE" or row.get("IS_PEP") == True) and row["COUNTRY_CODE"] in ["KY", "CH"]:
                 new_violations.append({"TIMESTAMP": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"), "ACCOUNT_ID": row["ACCOUNT_ID"], "CUSTOMER_NAME": row["CUSTOMER_NAME"], "ENFORCED_PROTOCOL": "ACTIVE_LOCK", "TRIGGER_RULE": "RULE_2_PEP_TAX_HAVEN", "STATUS": "AUTO_ENFORCED"})
         if new_violations:
             st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame(new_violations).drop_duplicates(subset=['ACCOUNT_ID', 'TRIGGER_RULE'])], ignore_index=True)
@@ -88,12 +104,6 @@ def render(engine):
         
     st.markdown("---")
     st.subheader("📋 Active Live REMEDIATION_LOG Table")
-    
-    # 🛡️ STATE INITIALIZER GATEWAY: Prevents Tab 4 from crashing if accessed before Tab 1
-    if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
-        st.session_state["remediation_log"] = pd.DataFrame(columns=[
-            "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
-        ])
         
     # Render the interactive dataframe view directory layer cleanly
     if not st.session_state["remediation_log"].empty:
