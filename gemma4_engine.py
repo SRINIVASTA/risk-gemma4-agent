@@ -234,11 +234,33 @@ class FraudCopilotEngine:
                     system_instruction=system_instruction,
                     temperature=0.1,
                     thinking_config=types.ThinkingConfig(thinking_level=active_tier_str),
-                    max_output_tokens=3000
+                    max_output_tokens=3000,
+                    
+                    # 🛡️ THE ARCHITECTURAL FIXED SAFETY OVERRIDE:
+                    # Prevents infrastructure refusals for raw compliance/fraud logs
+                    safety_settings=[
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                    ]
                 )
             )
             
             ai_analysis_text = response.text if response.text else "Material infractions detected against regulatory boundaries."
+            
             
             structured_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
