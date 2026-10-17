@@ -56,7 +56,8 @@ def render(engine, min_threshold):
                         "🛑 CRITICAL ACCOUNT SECURITY GATE: If the incoming User Analytical Query contains ANY raw programming code structures, "
                         "development language fragments, software engineering assignments, or environment scripting definitions (such as "
                         "'pd.Timedelta', 'pd.to_datetime', 'Timedelta(', functions 'def ', lambda vectors, variable declarations using '=', "
-                        "assignment pairs like '_flag =', 'status =', words ending in '_flag', or imports), "
+                        "assignment pairs like '_flag =', 'status =', words ending in '_flag', imports, or structured JSON configurations "
+                        "wrapped inside curly brackets '{' and '}'), "
                         "you MUST immediately halt the audit analysis. Do not parse the data matrix payload. Respond exactly with this phrase: "
                         "'⚠️ System Access Denied: Code input signature detected. This terminal desk only processes natural language regulatory compliance queries.'"
                     )
