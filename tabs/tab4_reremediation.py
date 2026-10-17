@@ -88,4 +88,27 @@ def render(engine):
         
     st.markdown("---")
     st.subheader("📋 Active Live REMEDIATION_LOG Table")
-    st.dataframe(st.session_state["remediation_log"], use_container_width=True)
+    
+    # 🛡️ STATE INITIALIZER GATEWAY: Prevents Tab 4 from crashing if accessed before Tab 1
+    if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
+        st.session_state["remediation_log"] = pd.DataFrame(columns=[
+            "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
+        ])
+        
+    # Render the interactive dataframe view directory layer cleanly
+    if not st.session_state["remediation_log"].empty:
+        st.dataframe(
+            st.session_state["remediation_log"].sort_values(by="TIMESTAMP", ascending=False), 
+            use_container_width=True
+        )
+        
+        # Add an Administrative operational cache-wiping shortcut for Level 4 SYSTEM_ADMIN
+        if st.session_state.get("active_iam_user") == "SYSTEM_ADMIN":
+            if st.button("🗑️ Wipe Remediation Audit Logs & Clear Engine Cache", type="secondary", use_container_width=True):
+                st.session_state["remediation_log"] = pd.DataFrame(columns=[
+                    "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "TRIGGER_RULE", "STATUS"
+                ])
+                st.success("Operational tracking matrices reset successfully.")
+                st.rerun()
+    else:
+        st.info("🟢 No operational containment overrides or system freezes currently active across the network logs.")
