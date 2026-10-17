@@ -1,11 +1,11 @@
-ACCOUNT_ID,CUSTOMER_NAME,KYC_STATUS,CUSTOMER_TYPE,IS_PEP,IEC_CODE,TRADE_LICENSE,GSTIN
-ACC_991,Alpha Global Holdings,Pending,Corporate,False,IEC_9910042401,LIC_991_ALPHA_HOUSE,27ALPHA9911B1ZS
-ACC_112,Rajesh Kumar,Verified,Individual,False,N/A,N/A,N/A
-ACC_445,Omega Trade Corp,Verified,Corporate,False,IEC_4450098202,LIC_445_OMEGA_CORP,27OMEGA4452C1ZS
-ACC_101,Srinivasta Enterprises,Verified,Corporate,True,IEC_1010077703,LIC_101_SRINI_HOUSE,27SRINI1013A1ZS
-ACC_202,Anita Sharma,Pending,Individual,True,N/A,N/A,N/A
-ACC_303,Zeta Logistics,Suspended,Corporate,False,IEC_3030012104,LIC_303_ZETA_LOGS,27ZETAL3034D1ZS
-ACC_505,Vikram Malhotra,Verified,Individual,False,N/A,N/A,N/A
-ACC_606,Sigma Ventures,Pending,Corporate,False,IEC_6060033205,LIC_606_SIGMA_VENT,27SIGMA6065E1ZS
-ACC_707,Priya Patel,Verified,Individual,False,N/A,N/A,N/A
-ACC_808,Nexus Infotech,Verified,Corporate,False,IEC_8080066106,LIC_808_NEXUS_INFO,27NEXUS8086F1ZS
+ACCOUNT_ID,CUSTOMER_NAME,KYC_STATUS,CUSTOMER_TYPE,IS_PEP,PAN,GSTIN,IEC_CODE,TRADE_LICENSE,CURRENT_BALANCE,AD_BANK,PERMANENT_ADDRESS
+ACC_991,Alpha Global Holdings,Pending,Corporate,False,PAN-ALPH991A,27ALPHA9911B1ZS,IEC_9910042401,LIC_991_ALPHA_HOUSE,1250000,State Bank of India,"14, Nariman Point, Cuffe Parade, Mumbai"
+ACC_112,Rajesh Kumar,Verified,Individual,False,PAN-RAJE112K,N/A,N/A,N/A,1250000,State Bank of India,"45, MG Road, Connaught Place, New Delhi"
+ACC_445,Omega Trade Corp,Verified,Corporate,False,PAN-OMEG445C,27OMEGA4452C1ZS,IEC_4450098202,LIC_445_OMEGA_CORP,1250000,State Bank of India,"88, IT Park, Electronic City, Bengaluru"
+ACC_101,Srinivasta Enterprises,Verified,Corporate,True,PAN-SRIN101E,27SRINI1013A1ZS,IEC_1010077703,LIC_101_SRINI_HOUSE,45750000,State Bank of India,"12, MVP Colony, Visakhapatnam, Andhra Pradesh"
+ACC_202,Anita Sharma,Pending,Individual,True,PAN-ANIT202S,N/A,N/A,N/A,1250000,State Bank of India,"72, Jubilee Hills, Road No 3, Hyderabad"
+ACC_303,Zeta Logistics,Suspended,Corporate,False,PAN-ZETA303L,27ZETAL3034D1ZS,IEC_3030012104,LIC_303_ZETA_LOGS,1250000,State Bank of India,"5, Salt Lake Sector V, Kolkata"
+ACC_505,Vikram Malhotra,Verified,Individual,False,PAN-VIKR505M,N/A,N/A,N/A,1250000,State Bank of India,"104, Boat Club Road, Poona, Maharashtra"
+ACC_606,Sigma Ventures,Pending,Corporate,False,PAN-SIGM606V,27SIGMA6065E1ZS,IEC_6060033205,LIC_606_SIGMA_VENT,1250000,State Bank of India,"31, Sector 17, Chandigarh, Punjab"
+ACC_707,Priya Patel,Verified,Individual,False,PAN-PRIY707P,N/A,N/A,N/A,1250000,State Bank of India,"19, GIDC Industrial Estate, Vadodara, Gujarat"
+ACC_808,Nexus Infotech,Verified,Corporate,False,PAN-NEXU808I,27NEXUS8086F1ZS,IEC_8080066106,LIC_808_NEXUS_INFO,1250000,State Bank of India,"61, JN Road, Alwarpet, Chennai, Tamil Nadu"
