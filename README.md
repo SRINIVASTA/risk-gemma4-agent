@@ -128,6 +128,24 @@ risk-gemma4-agent/
 
 ---
 
+## 🧠 Architectural Insights: Model Selection & Performance
+
+### 1. Why Gemma 4 (`gemma-4-26b-a4b-it`)?
+In an enterprise AML/CFT financial compliance runtime environment, generic consumer-facing LLMs are fundamentally unsuitable due to data privacy constraints, high transaction latency, and regulatory risk. The platform deliberately leverages Google's **Gemma 4 (26B)** architecture for key structural reasons:
+* **Enterprise-Grade Deep Reasoning:** Evaluating compliance breaches under the RBI Master KYC Directions requires complex logical chain-of-thought analysis. Gemma 4 features a native deep reasoning instruction-tuned model block to methodically parse complex temporal transaction anomalies against dense policy chunks.
+* **On-Premise Viability & Safety:** Highly regulated financial entities strictly prohibit streaming sensitive customer transaction ledgers to public APIs. At 26 Billion parameters, Gemma 4 is light enough to be deployed locally on a bank’s private secure cloud infrastructure, ensuring 100% data residency and confidentiality.
+* **Deterministic Constraint Alignment:** Gemma 4 operates with rigorous structural alignment. When fed exact legal text snippets via our LangChain FAISS vector store, it remains highly disciplined, sticking strictly to the context of the provided compliance framework and reducing hallucination risks.
+
+### ⚡ 2. Latency Mitigation & UX Responsiveness
+A common critique of large-scale open reasoning models like Gemma 4 is inference latency. The Risk-Gemma4-Agent terminal mitigates this through three system engineering patterns:
+* **Decoupled Asynchronous Milestones:** As outlined in the core sequence pipeline, the analytics platform splits execution. The deterministic engine (`gemma4_engine.py`) completes Pandas rolling math window alerts and FAISS vector sweeps instantly, rendering hard metrics to the workspace dashboard immediately. The system does not lock the UI while waiting for the LLM.
+* **Token Stream Pipeline Rendering:** The model client payload is bound to an active UI generator stream. Rather than caching the total text generation string arrays in the backend memory registers, text tokens stream to the presentation viewport in real-time (`st.write_stream`).
+* **Operational Context Fit:** AML/CFT compliance monitoring is structurally designed as an analytical back-office investigative review node rather than an inline payment gateway processor. Maximizing semantic accuracy and legal grounding against the RBI Master KYC Directions completely outweighs sub-second speed requirements.
+
+---
+
+---
+
 ## 🚀 Quick Start Deployment Guide
 
 ### 1. Provision Local Virtual Environment Dependencies
