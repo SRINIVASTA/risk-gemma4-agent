@@ -48,7 +48,7 @@ class FraudCopilotEngine:
         self.vector_db = FAISS.from_texts(chunks, self.embeddings)
 
     def _calculate_live_risk_score(self, df):
-        """Calculates risk matrices adhering strictly to RBICRC profiles and Section 4.2 system locks."""
+        """Calculates risk matrices adhering strictly to real dataset headers and security parameters."""
         scores = []
         
         # Pre-process rolling windows to isolate Section 7.3 velocity flags across 48 hours
@@ -63,20 +63,21 @@ class FraudCopilotEngine:
                         end_time = start_time + pd.Timedelta(hours=48)
                         window = cb_group[(cb_group["TIMESTAMP"] >= start_time) & (cb_group["TIMESTAMP"] <= end_time)]
                         
-                        # Verify structured shifts to disparate country codes
                         if len(window) >= 2 and window["COUNTRY_CODE"].nunique() > 1:
                             velocity_account_ids.add(account_id)
                             break
 
         for _, row in df.iterrows():
-            # 🚨 SECTION 4.2 COMPLIANCE BAN: Global system lock condition for unverified PEP profiles
-            if row.get("IS_PEP") == True and row["KYC_STATUS"] == "Pending" and row["COUNTRY_CODE"] != "IN":
+            # 🚨 FIXED SECTION 4.2 COMPLIANCE BAN: Handle string and boolean indicators safely
+            is_pep_active = str(row.get("IS_PEP")).strip().upper() == "TRUE" or row.get("IS_PEP") == True
+            
+            if is_pep_active and row["KYC_STATUS"] == "Pending" and row["COUNTRY_CODE"] != "IN":
                 scores.append(100)
                 continue
                 
             score = 0
             
-            # Dimension 1: FATF & Offshore Jurisdiction Profile
+            # Dimension 1: Country Codes Context Parsing
             if row["COUNTRY_CODE"] in ["KY", "CH"]:
                 score += 40
             elif row["COUNTRY_CODE"] in ["AE", "HK", "SG"]:
@@ -92,7 +93,7 @@ class FraudCopilotEngine:
             else:
                 score += 10  
                 
-            # Dimension 3: High-Value Reporting Exposure Caps
+            # Dimension 3: High-Value Caps
             if row["AMOUNT"] >= 5000000:
                 score += 25  
             elif row["AMOUNT"] >= 1000000:
@@ -100,11 +101,11 @@ class FraudCopilotEngine:
             else:
                 score += 5
 
-            # Dimension 4: Politically Exposed Person Verification Check
-            if row.get("IS_PEP") == True:
+            # Dimension 4: PEP Flag Weights
+            if is_pep_active:
                 score += 30  
                 
-            # Dimension 5: Section 7.3 Multiplier Flag
+            # Dimension 5: Section 7.3 Multiplier
             if row["ACCOUNT_ID"] in velocity_account_ids and row["COUNTRY_CODE"] != "IN":
                 score += 25
                 
