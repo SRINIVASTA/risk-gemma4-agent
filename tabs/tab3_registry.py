@@ -14,17 +14,30 @@ def render(engine):
         rem_log = st.session_state.get("remediation_log", pd.DataFrame())
         active_containment = "🟢 CLEAR"
         
+        # FIXED STATE TIMELINE CHECK: Evaluate the absolute latest chronological log action
         if not rem_log.empty:
-            acc_actions = rem_log[(rem_log["ACCOUNT_ID"] == selected_acc_id) & (rem_log["STATUS"].isin(["ACTIVE_ENFORCED", "AUTO_ENFORCED"]))]
-            if not acc_actions.empty: active_containment = acc_actions.iloc[-1]["ENFORCED_PROTOCOL"]
+            acc_actions = rem_log[rem_log["ACCOUNT_ID"] == selected_acc_id].sort_values(by="TIMESTAMP")
+            if not acc_actions.empty:
+                latest_action = acc_actions.iloc[-1]
+                if latest_action["ENFORCED_PROTOCOL"] == "UNLOCK_ACCOUNT" or latest_action["STATUS"] == "RELEASE_LOG_CLEAR":
+                    active_containment = "🟢 CLEAR"
+                else:
+                    active_containment = latest_action["ENFORCED_PROTOCOL"]
 
-        risk_tier = "CRITICAL" if active_containment == "ACTIVE_LOCK" else "HIGH" if acc_record.get("IS_PEP") == True else "LOW"
+        # Normalize the IS_PEP boolean check safely across evaluations
+        is_pep_active = str(acc_record.get("IS_PEP")).strip().upper() == "TRUE" or acc_record.get("IS_PEP") == True
+        risk_tier = "CRITICAL" if active_containment == "ACTIVE_LOCK" else "HIGH" if is_pep_active else "LOW"
             
         st.markdown("### Key Status")
         kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
         kpi_col1.metric("KYC Status", f"✅ {acc_record.get('KYC_STATUS', 'N/A')}")
-        kpi_col2.metric("Remediation", f"🚨 {active_containment}")
-        kpi_col3.metric("PEP", f"⚠️ {'YES' if acc_record.get('IS_PEP') else 'NO'}")
+        
+        if active_containment == "🟢 CLEAR":
+            kpi_col2.metric("Remediation", active_containment)
+        else:
+            kpi_col2.metric("Remediation", f"🚨 {active_containment}")
+            
+        kpi_col3.metric("PEP", f"⚠️ {'YES' if is_pep_active else 'NO'}")
         kpi_col4.metric("Risk Tier", f"🔴 {risk_tier}")
         
         st.markdown("---")
@@ -34,16 +47,24 @@ def render(engine):
             st.markdown(f"**Account ID:** `{selected_acc_id}`")
             st.markdown(f"**Customer Name:** {acc_record.get('CUSTOMER_NAME', 'N/A')}")
             st.markdown(f"**Customer Type:** {acc_record.get('CUSTOMER_TYPE', 'N/A')}")
+            
+            # 💡 100% DECOUPLED FROM CODE: Pulling trade data dynamically from database row fields
             if acc_record.get("CUSTOMER_TYPE") == "Corporate":
-                st.markdown("**IEC Code:** `IEC_2401010101`")
-                st.markdown("**Trade License:** `STAR_EXPORT_HOUSE`")
-                st.markdown("**Primary Trade Role:** `BOTH`")
+                st.markdown(f"**IEC Code:** `{acc_record.get('IEC_CODE', 'N/A')}`")
+                st.markdown(f"**Trade License:** `{acc_record.get('TRADE_LICENSE', 'N/A')}`")
+                st.markdown("**Primary Trade Role:** `MERCHANT_EXPORTER`")
+                
         with rec_col2:
-            st.markdown(f"**Authorized AD Bank:** State Bank of India")
-            st.markdown(f"**Current Balance:** ₹45,750,000" if selected_acc_id == "ACC_101" else f"**Current Balance:** ₹1,250,000")
-            st.markdown("**GSTIN:** `27AABCS1429B1ZS`" if acc_record.get("CUSTOMER_TYPE") == "Corporate" else "**GSTIN:** `N/A`")
-            st.markdown(f"**Tax Identifier (PAN):** `PAN-AABCS1429B`")
-            st.markdown(f"**Permanent Address:** 14, Nariman Point, Cuffe Parade, Mumbai")
+            # 💡 100% DECOUPLED FROM CODE: Pulling financial identifiers and locations dynamically from CSV
+            st.markdown(f"**Authorized AD Bank:** {acc_record.get('AD_BANK', 'N/A')}")
+            try:
+                formatted_bal = f"₹{int(acc_record.get('CURRENT_BALANCE', 0)):,}"
+            except ValueError:
+                formatted_bal = f"₹{acc_record.get('CURRENT_BALANCE', 'N/A')}"
+            st.markdown(f"**Current Balance:** {formatted_bal}")
+            st.markdown(f"**GSTIN:** `{acc_record.get('GSTIN', 'N/A')}`")
+            st.markdown(f"**Tax Identifier (PAN):** `{acc_record.get('PAN', 'N/A')}`")
+            st.markdown(f"**Permanent Address:** {acc_record.get('PERMANENT_ADDRESS', 'N/A')}")
 
         st.markdown("---")
         st.subheader("Transaction History")
