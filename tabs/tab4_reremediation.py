@@ -4,30 +4,44 @@
 # =====================================================================
 import streamlit as st
 import pandas as pd
+import os
 
 def render(engine):
     st.header("🛡️ Remediation & Actions Console")
     st.caption("Active Incident Response Core Routing - Updates the REMEDIATION_LOG Table Natively")
     st.markdown("---")
     
-    # Track states natively using clean local session dataframes
-    if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
-        st.session_state["remediation_log"] = pd.DataFrame(columns=[
-            "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "SYSTEMIC_LOCK_STATUS", "TRIGGER_RULE", "STATUS"
-        ])
+    # 💾 CORESYSTEM FILE INITIALIZATION: Auto-load logging metrics natively from storage arrays
+    log_csv_path = getattr(engine, "remediation_csv_path", "remediation_log.csv")
     
+    if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
+        if os.path.exists(log_csv_path):
+            try:
+                st.session_state["remediation_log"] = pd.read_csv(log_csv_path)
+            except Exception:
+                st.session_state["remediation_log"] = pd.DataFrame(columns=[
+                    "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "SYSTEMIC_LOCK_STATUS", "TRIGGER_RULE", "STATUS"
+                ])
+        else:
+            st.session_state["remediation_log"] = pd.DataFrame(columns=[
+                "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "SYSTEMIC_LOCK_STATUS", "TRIGGER_RULE", "STATUS"
+            ])
+
     st.subheader("🎯 Targeted Account Containment Protocols")
     c1, c2 = st.columns(2)
     
     with c1: 
+        # Sort and select target customer keys from master database file records
         target_account = st.selectbox("Select Target Profile to Contain:", sorted(engine.acc_df["ACCOUNT_ID"].unique()))
     
     with c2: 
+        # Updated protocol naming parameter option to "UNLOCKED" to mirror UI specifications
         selected_protocol = st.selectbox(
             "Select Mitigation Protocol to Enforce:", 
             ["ACTIVE_LOCK", "UNLOCKED", "ENHANCED_EDD", "DEBIT_HOLD_60_DAYS"]
         )
         
+    # Mandatory Justification UI elements - Only triggered if choosing to unlock an active lock
     compliance_justification = ""
     uploaded_doc = None
     
@@ -46,25 +60,25 @@ def render(engine):
         )
     
     if st.button("🚨 Dispatch Mitigation Protocol", type="primary", use_container_width=True):
+        # Validation Check: Enforce justification entry before processing a release routing rule
         if selected_protocol == "UNLOCKED" and not compliance_justification.strip():
             st.error("❌ **Compliance Block:** You must provide a justification remark to change protocol from ACTIVE_LOCK.")
         else:
-            cust_name = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["CUSTOMER_NAME"].values[0]
+            cust_name = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["CUSTOMER_NAME"].values
             
             # 📁 PERSISTENCE LAYER: Update the engine's active dataframe variables in memory
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "SYSTEMIC_LOCK_STATUS"] = selected_protocol
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "OUTBOUND_OVERRIDE_ENABLED"] = "true" if selected_protocol == "UNLOCKED" else "false"
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "COMPLIANCE_REMARKS"] = compliance_justification if selected_protocol == "UNLOCKED" else "NA"
             
-            # 💾 HARD CSV DISK WRITEBACK: Save back to the base file system structure automatically
+            # 💾 HARD CSV DISK WRITEBACK: Save back to the base accounts file system structure automatically
             try:
-                # Assumes your initialization script hosts the file path string parameter under engine.acc_csv_path
                 csv_target_path = getattr(engine, "acc_csv_path", "accounts.csv")
                 engine.acc_df.to_csv(csv_target_path, index=False)
             except Exception as e:
                 st.sidebar.warning(f"Note: Local CSV data mirrored in-memory, disk save skipped: {str(e)}")
 
-            # Append the structured record change to the live visualization logs
+            # Determine log parameters based on chosen action protocol routing rules
             trigger_rule_label = "MANUAL_CONTAINMENT_DESK" if selected_protocol != "UNLOCKED" else "MANUAL_RELEASE_DESK"
             enforcement_status = "ACTIVE_ENFORCED" if selected_protocol != "UNLOCKED" else "RELEASE_LOG_CLEAR"
             
@@ -78,8 +92,15 @@ def render(engine):
                 "STATUS": enforcement_status
             }
             
+            # Append mitigation protocol logs natively to the system session dataframes
             st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
             
+            # Persist the dynamic session changes into the log tracking file immediately
+            try:
+                st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
+            except Exception:
+                pass
+                
             if selected_protocol == "UNLOCKED":
                 st.success(f"🔓 **Incident Response Release Active:** Unlocked account **{target_account}** ({cust_name}) and saved updates to CSV source matrix.")
             else:
@@ -189,7 +210,6 @@ def render(engine):
             
             # 💾 HARD BACKEND FILE SAVE: Persist logs directly to your local file structure path
             try:
-                log_csv_path = getattr(engine, "remediation_csv_path", "remediation_log.csv")
                 updated_log.to_csv(log_csv_path, index=False)
             except Exception as e:
                 st.sidebar.warning(f"Note: Local log updated, CSV file save skipped: {str(e)}")
@@ -214,9 +234,8 @@ def render(engine):
                 
                 # Clear the backing file system data table instantly
                 try:
-                    log_csv_path = getattr(engine, "remediation_csv_path", "remediation_log.csv")
                     empty_log.to_csv(log_csv_path, index=False)
-                except:
+                except Exception:
                     pass
                     
                 st.success("Operational tracking matrices reset successfully.")
