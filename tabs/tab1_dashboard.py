@@ -70,15 +70,9 @@ def render(engine, min_threshold):
             # 🚨 LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
             current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER')
             
-            # Formulate the definitive compliance tracking metadata block
+            # 🛡️ FIXED: Removed manual duplication of Section 4 text block
             final_rendered_view = (
                 f"{report_markdown}\n\n"
-                "---\n"
-                "### 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
-                "* 🛡️ **Emergency Containment Protocol:** Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of **60 days**.\n"
-                "* ⏳ **Time-Bound Resolution Protocol:** Initiate the time-bound resolution protocol: grant identified account holders a **20-day notification window** to submit official justification documents.\n"
-                "* 📤 **External Regulatory Pipeline:** Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within **30 days** for confirmed mule identities.\n"
-                "* 🔒 **Ecosystem Interlock Enforcement:** Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers.\n\n"
                 "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 f"**Review Status:** {current_signoff}"
@@ -142,15 +136,7 @@ def render(engine, min_threshold):
                             Paragraph(str(row.get("KYC_STATUS", row.get(status_col, "N/A"))), table_text_style)
                         ])
                     
-                    # 🔧 SAFE STRUCTURAL WORKAROUND: Immune to markdown parsing token cutting bugs
-                    t_widths = list()
-                    t_widths.append(50)   # Transaction ID Column width
-                    t_widths.append(55)   # Account ID Column width
-                    t_widths.append(130)  # Customer Name Column width
-                    t_widths.append(90)   # Amount Column width
-                    t_widths.append(45)   # Destination Country Column width
-                    t_widths.append(55)   # Risk Score Column width
-                    t_widths.append(65)   # KYC Status Column width
+                    t_widths = [50, 55, 130, 90, 45, 55, 65]
                     
                     pdf_table = Table(table_data, colWidths=t_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
@@ -163,12 +149,19 @@ def render(engine, min_threshold):
                     story.append(pdf_table)
                     story.append(Spacer(1, 15))
                     
-                    # 📥 REGULATORY MANDATE ATTACHMENTS FOR REPORTLAB CANVAS FLOWABLE STORY
+                    # 🔧 FIXED: Extracted and rendered the AI generated text block seamlessly for Section 4 inside the PDF flowables story pipeline
                     story.append(Paragraph("💡 4. RECOMMENDED COMPLIANCE ACTIONS", h2_style))
-                    story.append(Paragraph("• <b>🛡️ Emergency Containment Protocol:</b> Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.", body_style))
-                    story.append(Paragraph("• <b>⏳ Time-Bound Resolution Protocol:</b> Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.", body_style))
-                    story.append(Paragraph("• <b>📤 External Regulatory Pipeline:</b> Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within 30 days for confirmed mule identities.", body_style))
-                    story.append(Paragraph("• <b>🔒 Ecosystem Interlock Enforcement:</b> Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers.", body_style))
+                    if "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS" in ai_analysis_text:
+                        # Extract section text from the model generation directly to verify layout separation rules
+                        ai_recommendations = ai_analysis_text.split("## 💡 4. RECOMMENDED COMPLIANCE ACTIONS")[-1].strip()
+                        ai_recommendations_cleaned = ai_recommendations.replace("\n", "<br/>")
+                        story.append(Paragraph(ai_recommendations_cleaned, body_style))
+                    else:
+                        # Fallback clean structure mapping
+                        story.append(Paragraph("• <b>🛡️ Emergency Containment Protocol:</b> Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.", body_style))
+                        story.append(Paragraph("• <b>⏳ Time-Bound Resolution Protocol:</b> Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.", body_style))
+                        story.append(Paragraph("• <b>📤 External Regulatory Pipeline:</b> Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within 30 days for confirmed mule identities.", body_style))
+                        story.append(Paragraph("• <b>🔒 Ecosystem Interlock Enforcement:</b> Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers.", body_style))
                     
                     doc.build(story)
                     pdf_data = pdf_buffer.getvalue()
