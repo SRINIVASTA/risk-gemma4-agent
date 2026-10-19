@@ -74,6 +74,12 @@ def render(engine, min_threshold):
             final_rendered_view = (
                 f"{report_markdown}\n\n"
                 "---\n"
+                "### 💡 4. RECOMMENDED COMPLIANCE ACTIONS\n"
+                "* 🛡️ **Emergency Containment Protocol:** Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of **60 days**.\n"
+                "* ⏳ **Time-Bound Resolution Protocol:** Initiate the time-bound resolution protocol: grant identified account holders a **20-day notification window** to submit official justification documents.\n"
+                "* 📤 **External Regulatory Pipeline:** Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within **30 days** for confirmed mule identities.\n"
+                "* 🔒 **Ecosystem Interlock Enforcement:** Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers.\n\n"
+                "---\n"
                 "**Prepared By:** Risk-Gemma4-Agent System Cluster  \n"
                 f"**Review Status:** {current_signoff}"
             )
@@ -120,7 +126,6 @@ def render(engine, min_threshold):
                     
                     # Core loop extraction to inject rows safely into the PDF table grid matrix
                     for idx, row in signals_df.head(30).iterrows():
-                        # Extract the risk score signature value dynamically based on present columns
                         val_risk_raw = row.get("RISK_SCORE", row.get(risk_col, 0))
                         try:
                             val_risk_pct = f"{float(val_risk_raw):.1f}%"
@@ -137,6 +142,7 @@ def render(engine, min_threshold):
                             Paragraph(str(row.get("KYC_STATUS", row.get(status_col, "N/A"))), table_text_style)
                         ])
                     
+                    # 🔧 FIXED: Restored column structural widths layout array parameters
                     col_widths = [50, 55, 130, 90, 45, 55, 55]
                     pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
@@ -147,6 +153,14 @@ def render(engine, min_threshold):
                         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                     ]))
                     story.append(pdf_table)
+                    story.append(Spacer(1, 15))
+                    
+                    # 📥 NEW COMPLIANCE SECTION ATTACHMENT INTO PDF CANVAS STORY
+                    story.append(Paragraph("💡 4. RECOMMENDED COMPLIANCE ACTIONS", h2_style))
+                    story.append(Paragraph("• <b>Emergency Containment Protocol:</b> Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.", body_style))
+                    story.append(Paragraph("• <b>Time-Bound Resolution Window:</b> Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.", body_style))
+                    story.append(Paragraph("• <b>External Regulatory Pipeline:</b> Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within 30 days for confirmed mule identities.", body_style))
+                    story.append(Paragraph("• <b>Ecosystem Interlock Enforcement:</b> Enforce the immediate global system lock on any pending PEP profiles executing cross-border transfers.", body_style))
                     
                     doc.build(story)
                     pdf_data = pdf_buffer.getvalue()
