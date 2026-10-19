@@ -225,53 +225,58 @@ def render(engine):
             if acct_id in unlocked_accounts:
                 continue
                 
-            # ─── RULE 1 AUTOMATION: Sanctioned Country Auto-Freeze ───
+            # ─── 🛑 SEVERITY 1: Sanctioned Country Auto-Freeze (CRITICAL) ───
             if row["COUNTRY_CODE"] in ["KP", "IR", "SY", "MM"]:
                 new_violations.append({
-                    "ACTION_ID": str(uuid.uuid4()),
-                    "ACCOUNT_ID": acct_id, 
-                    "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK",
-                    "OUTBOUND_OVERRIDE_ENABLED": "false",
-                    "KYC_STEP_UP_LEVEL": "CRITICAL",
-                    "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
-                    "UPDATED_BY": "REGULATORY_SWEEP_ENGINE",
-                    "COMPLIANCE_REMARKS": "RULE_1_SANCTION_VIOLATION",
-                    "DOCUMENT_REFERENCE": "NA"
+                    "ACTION_ID": str(uuid.uuid4()), "ACCOUNT_ID": acct_id, 
+                    "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false",
+                    "KYC_STEP_UP_LEVEL": "CRITICAL", "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                    "UPDATED_BY": "REGULATORY_SWEEP_ENGINE", "COMPLIANCE_REMARKS": "RULE_1_SANCTION_VIOLATION", "DOCUMENT_REFERENCE": "NA"
                 })
-                # 🛡️ DYNAMIC FIX LAYER: Rewrite core master configuration states to Pending on-the-fly
+                # Dynamic Database Override
                 engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "KYC_STATUS"] = "Pending"
                 engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "SYSTEMIC_LOCK_STATUS"] = "ACTIVE_LOCK"
+                continue # Skip lesser holds if critical sanction is triggered
             
-            # ─── RULE 2 AUTOMATION: PEP Tax Haven Leak ───
+            # ─── ⚠️ SEVERITY 2: PEP Tax Haven Leak (ENHANCED_EDD) ───
             if (str(row.get("IS_PEP")).strip().upper() == "TRUE" or row.get("IS_PEP") == True) and row["COUNTRY_CODE"] in ["KY", "CH"]:
                 new_violations.append({
-                    "ACTION_ID": str(uuid.uuid4()),
-                    "ACCOUNT_ID": acct_id, 
-                    "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK",
-                    "OUTBOUND_OVERRIDE_ENABLED": "false",
-                    "KYC_STEP_UP_LEVEL": "ENHANCED_EDD",
-                    "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
-                    "UPDATED_BY": "REGULATORY_SWEEP_ENGINE",
-                    "COMPLIANCE_REMARKS": "RULE_2_PEP_TAX_HAVEN",
-                    "DOCUMENT_REFERENCE": "NA"
+                    "ACTION_ID": str(uuid.uuid4()), "ACCOUNT_ID": acct_id, 
+                    "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false",
+                    "KYC_STEP_UP_LEVEL": "ENHANCED_EDD", "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                    "UPDATED_BY": "REGULATORY_SWEEP_ENGINE", "COMPLIANCE_REMARKS": "RULE_2_PEP_TAX_HAVEN", "DOCUMENT_REFERENCE": "NA"
                 })
-                # 🛡️ DYNAMIC FIX LAYER: Rewrite core master configuration states to Pending on-the-fly
+                # Dynamic Database Override
                 engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "KYC_STATUS"] = "Pending"
                 engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "SYSTEMIC_LOCK_STATUS"] = "ACTIVE_LOCK"
-                
+                continue
+
+            # ─── ⏳ SEVERITY 3: Section 9.4 Standard Cyber Fraud (DEBIT_HOLD_60_DAYS) ───
+            # 🛡️ FIXED: Added dynamic checking for standard unverified/suspended accounts moving > ₹1,000
+            is_unverified = str(row.get("KYC_STATUS")).strip().title() in ["Pending", "Suspended"]
+            if is_unverified and row["AMOUNT"] >= 1000:
+                new_violations.append({
+                    "ACTION_ID": str(uuid.uuid4()), "ACCOUNT_ID": acct_id, 
+                    "SYSTEMIC_LOCK_STATUS": "DEBIT_HOLD_60_DAYS", "OUTBOUND_OVERRIDE_ENABLED": "false",
+                    "KYC_STEP_UP_LEVEL": "STANDARD_FRAUD_ALERT", "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                    "UPDATED_BY": "REGULATORY_SWEEP_ENGINE", "COMPLIANCE_REMARKS": "SECTION_9_4_MULE_SUSPECT", "DOCUMENT_REFERENCE": "NA"
+                })
+                # 🛡️ DYNAMIC OVERRIDE FIX: Forces status to Pending on-the-fly inside account master
+                engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "KYC_STATUS"] = "Pending"
+                engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == acct_id, "SYSTEMIC_LOCK_STATUS"] = "DEBIT_HOLD_60_DAYS"
+
         if new_violations:
             violations_df = pd.DataFrame(new_violations)
-            updated_log = pd.concat([st.session_state["remediation_log"], violations_df], ignore_index=True)
+            updated_log = pd.concat([st.session_state["concerning_log" if "concerning_log" in st.session_state else "remediation_log"], violations_df], ignore_index=True)
             
-            # Deduplicate logs and establish clean parameters strictly
+            # Deduplicate logs and force structured formatting
             updated_log = updated_log.drop_duplicates(subset=['ACCOUNT_ID', 'COMPLIANCE_REMARKS'])
             st.session_state["remediation_log"] = updated_log.reindex(columns=unified_columns).reset_index(drop=True)
             
             try:
-                # 🌟 COMMIT DYNAMIC UPDATES TO DISK: Sync account_master table state permanently
+                # Commit updates back to files permanently
                 csv_target_path = getattr(engine, "acc_csv_path", "data/account_master.csv")
                 engine.acc_df.to_csv(csv_target_path, index=False)
-                
                 st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
             except Exception:
                 pass
