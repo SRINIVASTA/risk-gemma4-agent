@@ -103,7 +103,14 @@ def render(engine):
         if selected_protocol == "UNLOCKED" and not compliance_justification.strip():
             st.error("❌ **Compliance Block:** You must provide a justification remark to change protocol from ACTIVE_LOCK.")
         else:
-            current_kyc = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["KYC_STATUS"].values[0] if not engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account].empty else "STANDARD"
+            # 🛡️ THE FIX: Force the profile status to change to 'Pending' if an action protocol is deployed
+            if selected_protocol in ["ACTIVE_LOCK", "DEBIT_HOLD_60_DAYS", "ENHANCED_EDD"]:
+                engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "KYC_STATUS"] = "Pending"
+                current_kyc = "Pending"
+            else:
+                # Fallback to keep standard verification levels if unlocking
+                current_kyc = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["KYC_STATUS"].values[0] if not engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account].empty else "STANDARD"
+                
             step_up = "CRITICAL" if selected_protocol == "ACTIVE_LOCK" else current_kyc
             
             # Enforce dynamic downstream parameter updates to database instances
@@ -116,6 +123,28 @@ def render(engine):
                 engine.acc_df.to_csv(csv_target_path, index=False)
             except Exception:
                 pass
+
+            new_log = {
+                "ACTION_ID": str(uuid.uuid4()),
+                "ACCOUNT_ID": target_account, 
+                "SYSTEMIC_LOCK_STATUS": selected_protocol,
+                "OUTBOUND_OVERRIDE_ENABLED": "true" if selected_protocol == "UNLOCKED" else "false",
+                "KYC_STEP_UP_LEVEL": step_up,
+                "UPDATED_AT": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                "UPDATED_BY": st.session_state.get("active_iam_user", "sysadmin01"),
+                "COMPLIANCE_REMARKS": compliance_justification if selected_protocol == "UNLOCKED" else "MANUAL_OVERRIDE",
+                "DOCUMENT_REFERENCE": uploaded_doc_name
+            }
+            
+            updated_df = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
+            # Enforce clean reindex to trap and exclude mutated parameter matrices
+            st.session_state["remediation_log"] = updated_df.reindex(columns=unified_columns).reset_index(drop=True)
+            
+            try:
+                st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
+            except Exception:
+                pass
+            st.rerun()
 
             new_log = {
                 "ACTION_ID": str(uuid.uuid4()),
