@@ -67,7 +67,7 @@ def render(engine, min_threshold):
             active_tier_token = st.session_state.get("active_thinking_level", "MINIMAL")
             report_markdown = engine.generate_audit_report(signals_df, evidence, active_tier_token)
             
-            # LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
+            # 🚨 LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
             current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER')
             
             # Formulate the definitive compliance tracking metadata block
@@ -142,9 +142,17 @@ def render(engine, min_threshold):
                             Paragraph(str(row.get("KYC_STATUS", row.get(status_col, "N/A"))), table_text_style)
                         ])
                     
-                    # 🔧 FIXED: Restored column structural layout width definitions matching layout vectors
-                    col_widths = [50, 55, 130, 90, 45, 55, 55]
-                    pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
+                    # 🔧 SAFE STRUCTURAL WORKAROUND: Immune to markdown parsing token cutting bugs
+                    t_widths = list()
+                    t_widths.append(50)   # Transaction ID Column width
+                    t_widths.append(55)   # Account ID Column width
+                    t_widths.append(130)  # Customer Name Column width
+                    t_widths.append(90)   # Amount Column width
+                    t_widths.append(45)   # Destination Country Column width
+                    t_widths.append(55)   # Risk Score Column width
+                    t_widths.append(65)   # KYC Status Column width
+                    
+                    pdf_table = Table(table_data, colWidths=t_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
                         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2F4F4F')),
                         ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
