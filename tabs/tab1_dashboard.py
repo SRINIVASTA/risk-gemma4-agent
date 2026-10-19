@@ -67,7 +67,7 @@ def render(engine, min_threshold):
             active_tier_token = st.session_state.get("active_thinking_level", "MINIMAL")
             report_markdown = engine.generate_audit_report(signals_df, evidence, active_tier_token)
             
-            # 🚨 LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
+            # LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
             current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER')
             
             # Formulate the definitive compliance tracking metadata block
@@ -142,7 +142,7 @@ def render(engine, min_threshold):
                             Paragraph(str(row.get("KYC_STATUS", row.get(status_col, "N/A"))), table_text_style)
                         ])
                     
-                    # 🔧 FIXED: Restored column structural layout width definitions
+                    # 🔧 FIXED: Restored column structural layout width definitions matching layout vectors
                     col_widths = [50, 55, 130, 90, 45, 55, 55]
                     pdf_table = Table(table_data, colWidths=col_widths, repeatRows=1)
                     pdf_table.setStyle(TableStyle([
@@ -155,7 +155,7 @@ def render(engine, min_threshold):
                     story.append(pdf_table)
                     story.append(Spacer(1, 15))
                     
-                    # 📥 REGULATORY MANDATE ATTACHMENTS FOR REPORTLAB STACK
+                    # 📥 REGULATORY MANDATE ATTACHMENTS FOR REPORTLAB CANVAS FLOWABLE STORY
                     story.append(Paragraph("💡 4. RECOMMENDED COMPLIANCE ACTIONS", h2_style))
                     story.append(Paragraph("• <b>🛡️ Emergency Containment Protocol:</b> Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.", body_style))
                     story.append(Paragraph("• <b>⏳ Time-Bound Resolution Protocol:</b> Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.", body_style))
