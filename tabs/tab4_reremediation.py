@@ -1,6 +1,6 @@
 # =====================================================================
 # ─── RISK-GEMMA4-AGENT: 🛡️ REMEDIATION & ACTIONS CONSOLE (TAB 4) ─────
-# ─── PART 1: TARGET CONTAINMENT DESK & INTERACTIVE UNLOCK MATRIX ─────
+# ─── PART 1: CORE RE-ALIGNMENT INGESTION & MANUAL CONTAINMENT DESK ───
 # =====================================================================
 import streamlit as st
 import pandas as pd
@@ -14,33 +14,40 @@ def render(engine):
     
     log_csv_path = getattr(engine, "remediation_csv_path", "data/remediation_log.csv")
     
-    # 🔗 SHIELD LAYER: Dynamic Initialization and Automatic Schema Version Translation
+    # 🛡️ DEFENSIVE UNIFIED SCHEMA SPECIFICATION DIRECTORY MATRIX
+    unified_columns = [
+        "ACTION_ID", "ACCOUNT_ID", "SYSTEMIC_LOCK_STATUS", "OUTBOUND_OVERRIDE_ENABLED", 
+        "KYC_STEP_UP_LEVEL", "UPDATED_AT", "UPDATED_BY", "COMPLIANCE_REMARKS", "DOCUMENT_REFERENCE"
+    ]
+    
+    # Initialize / Re-align logging dataframe vectors inside active memory state mirrors
     if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
         if os.path.exists(log_csv_path):
             try:
                 loaded_df = pd.read_csv(log_csv_path)
                 
-                # 🔄 INTERCEPT ARCHITECTURE: If file contains old naming rules, transform to Snowflake columns on the fly
+                # 🔄 AUTOMATIC LAYER INTERCEPT: Clean out legacy columns to arrest data fragmentation anomalies
                 if "TIMESTAMP" in loaded_df.columns:
                     loaded_df = loaded_df.rename(columns={
                         "TIMESTAMP": "UPDATED_AT",
                         "TRIGGER_RULE": "COMPLIANCE_REMARKS",
                         "STATUS": "KYC_STEP_UP_LEVEL"
                     })
-                    if "ACTION_ID" not in loaded_df.columns:
-                        loaded_df["ACTION_ID"] = [str(uuid.uuid4()) for _ in range(len(loaded_df))]
-                    if "OUTBOUND_OVERRIDE_ENABLED" not in loaded_df.columns:
-                        loaded_df["OUTBOUND_OVERRIDE_ENABLED"] = "false"
-                    if "DOCUMENT_REFERENCE" not in loaded_df.columns:
-                        loaded_df["DOCUMENT_REFERENCE"] = "NA"
+                
+                # Re-index dataframe strictly to prune extraneous empty parameter keys safely
+                loaded_df = loaded_df.reindex(columns=unified_columns)
+                
+                # Verify structural validation loops to anchor system-wide identifier mappings
+                if not loaded_df.empty and loaded_df["ACTION_ID"].isnull().any():
+                    loaded_df["ACTION_ID"] = loaded_df["ACTION_ID"].apply(lambda x: str(uuid.uuid4()) if pd.isnull(x) else x)
                 
                 st.session_state["remediation_log"] = loaded_df
             except Exception:
-                st.session_state["remediation_log"] = pd.DataFrame()
+                st.session_state["remediation_log"] = pd.DataFrame(columns=unified_columns)
         else:
-            st.session_state["remediation_log"] = pd.DataFrame()
+            st.session_state["remediation_log"] = pd.DataFrame(columns=unified_columns)
         
-        # Self-Healing Layer: Runs automatically if data table remains unpopulated
+        # Self-Healing Routine: Re-align operational profiles dynamically if the ledger reads empty
         if st.session_state["remediation_log"].empty:
             init_records = []
             if not engine.acc_df.empty:
@@ -50,37 +57,25 @@ def render(engine):
                         "ACTION_ID": str(uuid.uuid4()),
                         "ACCOUNT_ID": h_row["ACCOUNT_ID"],
                         "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK",
-                        "OUTBOUND_OVERRIDE_ENABLED": "true" if str(h_row.get("OUTBOUND_OVERRIDE_ENABLED")).strip().lower() == "true" else "false",
+                        "OUTBOUND_OVERRIDE_ENABLED": "false",
                         "KYC_STEP_UP_LEVEL": h_row.get("KYC_STATUS", "STANDARD"),
-                        "UPDATED_AT": "2026-09-29T12:06:34.051",
+                        "UPDATED_AT": "2026-10-19T12:00:00",
                         "UPDATED_BY": "REGULATORY_SWEEP_ENGINE",
                         "COMPLIANCE_REMARKS": "HISTORICAL_SWEEP_RECOVERY",
                         "DOCUMENT_REFERENCE": "NA"
                     })
-            
-            st.session_state["remediation_log"] = pd.DataFrame(init_records, columns=[
-                "ACTION_ID", "ACCOUNT_ID", "SYSTEMIC_LOCK_STATUS", "OUTBOUND_OVERRIDE_ENABLED", 
-                "KYC_STEP_UP_LEVEL", "UPDATED_AT", "UPDATED_BY", "COMPLIANCE_REMARKS", "DOCUMENT_REFERENCE"
-            ]).reset_index(drop=True)
-            
+            st.session_state["remediation_log"] = pd.DataFrame(init_records, columns=unified_columns).reset_index(drop=True)
             try:
                 os.makedirs(os.path.dirname(log_csv_path), exist_ok=True)
                 st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
             except Exception:
-                pass 
-
-    # Double check mapping continuity right before rendering layout items
-    log_df = st.session_state["remediation_log"]
-    if "UPDATED_AT" not in log_df.columns and not log_df.empty:
-        log_df = log_df.rename(columns={"TIMESTAMP": "UPDATED_AT", "TRIGGER_RULE": "COMPLIANCE_REMARKS"})
-        st.session_state["remediation_log"] = log_df
+                pass
 
     st.subheader("🎯 Targeted Account Containment Protocols")
     c1, c2 = st.columns(2)
     
     with c1: 
         target_account = st.selectbox("Select Target Profile to Contain:", sorted(engine.acc_df["ACCOUNT_ID"].unique()))
-    
     with c2: 
         selected_protocol = st.selectbox(
             "Select Mitigation Protocol to Enforce:", 
@@ -92,12 +87,10 @@ def render(engine):
     
     if selected_protocol == "UNLOCKED":
         st.warning("⚠️ Changing protocol from ACTIVE_LOCK requires mandatory compliance justification.")
-        
         compliance_justification = st.text_area(
             "Compliance Remarks & Justification", 
             placeholder="Provide detailed justification for this protocol change..."
         )
-        
         uploaded_doc = st.file_uploader(
             "Enclosed Scanned Letter / Document Reference", 
             type=["pdf", "png", "jpg"],
@@ -113,6 +106,7 @@ def render(engine):
             current_kyc = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["KYC_STATUS"].values[0] if not engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account].empty else "STANDARD"
             step_up = "CRITICAL" if selected_protocol == "ACTIVE_LOCK" else current_kyc
             
+            # Enforce dynamic downstream parameter updates to database instances
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "SYSTEMIC_LOCK_STATUS"] = selected_protocol
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "OUTBOUND_OVERRIDE_ENABLED"] = "true" if selected_protocol == "UNLOCKED" else "false"
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "COMPLIANCE_REMARKS"] = compliance_justification if selected_protocol == "UNLOCKED" else "NA"
@@ -136,22 +130,25 @@ def render(engine):
             }
             
             updated_df = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
-            st.session_state["remediation_log"] = updated_df.reset_index(drop=True)
+            # Enforce clean reindex to trap and exclude mutated parameter matrices
+            st.session_state["remediation_log"] = updated_df.reindex(columns=unified_columns).reset_index(drop=True)
             
             try:
                 st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
             except Exception:
                 pass
             st.rerun()
-    # =====================================================================
-    # ─── PART 2: REGULATORY SIGN-OFFS & AUTOMATED ENGINE SCAN LOOPS ───────
-    # =====================================================================
+# =====================================================================
+# ─── RISK-GEMMA4-AGENT: 🛡️ REMEDIATION & ACTIONS CONSOLE (TAB 4) ─────
+# ─── PART 2: REGULATORY ROUTING CORE, AUTOMATION SWEEPS & LEDGERS ────
+# =====================================================================
     st.markdown("---")
     st.subheader("📋 Regulatory Export & Core Controls")
     ae1, ae2 = st.columns(2)
+    
     with ae1:
         if st.button("📤 Export Compliance Package & File STR to FIU-IND Portal", use_container_width=True): 
-            st.success("📤 Routed to FIU-IND gateways successfully.")
+            st.success("📤 Routed to FIU-IND gateways successfully via NCRP tracking ports.")
     with ae2:
         log_df = st.session_state["remediation_log"]
         active_locks_exist = False
@@ -180,7 +177,7 @@ def render(engine):
     * **Rule 1 - Sanctioned Country Auto-Freeze:** If any transaction routes to KP, IR, SY, or MM ➔ Immediate ACTIVE_LOCK + auto-generated STR.
     * **Rule 2 - PEP Tax Haven Lock:** If a PEP account routes funds to KY or CH ➔ Immediate ACTIVE_LOCK + ENHANCED_EDD.
     """)
-    st.warning("⚠️ This will scan ALL transactions and auto-lock matching accounts in the REMEDIATION_LOG.")
+    st.warning("⚠️ This will scan ALL transactions and auto-lock matching accounts in the REMEDIATION_LOG without header corruption.")
     
     if st.button("⚡ Run Engine Automated Rules Automation", use_container_width=True):
         clean_tx = engine.tx_df[engine.tx_df["TRANSACTION_ID"] != "TRANSACTION_ID"]
@@ -196,7 +193,6 @@ def render(engine):
 
         for _, row in merged_ledger.iterrows():
             acct_id = row["ACCOUNT_ID"]
-            
             if acct_id in unlocked_accounts:
                 continue
                 
@@ -229,14 +225,15 @@ def render(engine):
                 })
                 
         if new_violations:
-            updated_log = pd.concat([st.session_state["remediation_log"], pd.DataFrame(new_violations)], ignore_index=True)
+            violations_df = pd.DataFrame(new_violations)
+            updated_log = pd.concat([st.session_state["remediation_log"], violations_df], ignore_index=True)
             
-            # Drops duplicates and perfectly shifts the indices to count consecutively
-            updated_log = updated_log.drop_duplicates(subset=['ACCOUNT_ID', 'COMPLIANCE_REMARKS']).reset_index(drop=True)
+            # Deduplicate logs across constraints and force unified structure parameters strictly
+            updated_log = updated_log.drop_duplicates(subset=['ACCOUNT_ID', 'COMPLIANCE_REMARKS'])
+            st.session_state["remediation_log"] = updated_log.reindex(columns=unified_columns).reset_index(drop=True)
             
-            st.session_state["remediation_log"] = updated_log
             try:
-                updated_log.to_csv(log_csv_path, index=False)
+                st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
             except Exception:
                 pass
         st.rerun()
@@ -245,17 +242,14 @@ def render(engine):
     st.subheader("📋 Active Live REMEDIATION_LOG Table")
         
     if not st.session_state["remediation_log"].empty:
-        # Display the log dataframe with absolute index security configurations
+        # Display cleanly aligned logs, avoiding empty cell layouts
         st.dataframe(
             st.session_state["remediation_log"].sort_values(by="UPDATED_AT", ascending=False), 
             use_container_width=True
         )
         if st.session_state.get("active_iam_user") == "SYSTEM_ADMIN":
             if st.button("🗑️ Wipe Remediation Audit Logs & Clear Engine Cache", type="secondary", use_container_width=True):
-                empty_log = pd.DataFrame(columns=[
-                    "ACTION_ID", "ACCOUNT_ID", "SYSTEMIC_LOCK_STATUS", "OUTBOUND_OVERRIDE_ENABLED", 
-                    "KYC_STEP_UP_LEVEL", "UPDATED_AT", "UPDATED_BY", "COMPLIANCE_REMARKS", "DOCUMENT_REFERENCE"
-                ])
+                empty_log = pd.DataFrame(columns=unified_columns)
                 st.session_state["remediation_log"] = empty_log
                 try:
                     empty_log.to_csv(log_csv_path, index=False)
