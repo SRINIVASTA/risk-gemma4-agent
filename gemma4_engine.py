@@ -44,7 +44,12 @@ class FraudCopilotEngine:
         chunks = [chunk.strip() for chunk in policy_content.split("\n\n") if chunk.strip()]
         
         # 3. Initialize Model Vector Store Infrastructure
-        self.embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001", google_api_key=api_key)
+        # 🛡️ FIXED: Enforced explicit key mapping and retrieval task types to avoid cache-clear exceptions
+        self.embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/gemini-embedding-001", 
+            google_api_key=api_key,
+            task_type="retrieval_document"
+        )
         self.vector_db = FAISS.from_texts(chunks, self.embeddings)
 
     def _calculate_live_risk_score(self, df):
@@ -113,6 +118,7 @@ class FraudCopilotEngine:
             
         return scores
 # =====================================================================
+# ─── RISK-GEMMA4-AGENT: CORE RISK REASONING & ANALYTICAL PIPELINE ───
 # ─── PART 2: DETECT SIGNALS, RAG EVIDENCE, & STR REPORT GENERATION ───
 # =====================================================================
     def detect_signals(self, min_amount=5000000):
@@ -176,7 +182,6 @@ class FraudCopilotEngine:
                     
         return "\n\n".join(evidence_pool)
 
-    # 💡 CRITICAL ARGUMENT SIGNATURE CORRECTION: Accepts third token cleanly to resolve dashboard crashes
     def generate_audit_report(self, flagged_df, evidence, active_thinking_level="MINIMAL"):
         """Step 3: Compile finalized report text completely decoupled from UI runtime state management."""
         if flagged_df.empty:
@@ -225,7 +230,6 @@ class FraudCopilotEngine:
         """
         
         try:
-            # Safe clean parsing delivery to accommodate SDK parameters
             active_tier_str = str(active_thinking_level).upper()
             
             response = self.client.models.generate_content(
@@ -236,32 +240,16 @@ class FraudCopilotEngine:
                     temperature=0.1,
                     thinking_config=types.ThinkingConfig(thinking_level=active_tier_str),
                     max_output_tokens=3000,
-                    
-                    # 🛡️ THE ARCHITECTURAL FIXED SAFETY OVERRIDE:
-                    # Prevents infrastructure refusals for raw compliance/fraud logs
                     safety_settings=[
-                        types.SafetySetting(
-                            category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
-                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                        ),
-                        types.SafetySetting(
-                            category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                        ),
-                        types.SafetySetting(
-                            category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                        ),
-                        types.SafetySetting(
-                            category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                        ),
+                        types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HARASSMENT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+                        types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+                        types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
+                        types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold=types.HarmBlockThreshold.BLOCK_NONE),
                     ]
                 )
             )
             
             ai_analysis_text = response.text if response.text else "Material infractions detected against regulatory boundaries."
-            
             
             structured_report = (
                 "# SUSPICIOUS TRANSACTION REPORT (STR)\n\n"
