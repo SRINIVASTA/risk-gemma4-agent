@@ -203,30 +203,37 @@ class FraudCopilotEngine:
 
         system_instruction = (
             "You are an elite enterprise financial compliance auditor operating under RBI guidelines. "
-            "Examine the regulatory evidence base and isolate the broken sections. "
-            "You MUST reformat the provided raw text rules into structured markdown blocks. "
+            "Examine the provided regulatory evidence base and cross-reference it against the flagged transaction ledger. "
+            "Isolate the exact accounts breaking specific rules and format your output into structured markdown blocks. "
             "For each section broken, use the exact headings: 'Specific Section Broken:' and 'Evidence:'."
         )
         
+        # 🛡️ FIXED: Injected the active transaction ledger context directly into the reasoning prompt block
         prompt = f"""
-        REGULATORY EVIDENCE BASE:
+        REGULATORY EVIDENCE BASE POLICY DIRECTORY:
         {evidence}
         
-        Using ONLY the evidence base text above, extract the broken rules and format them EXACTLY like this:
+        ACTIVE FLAGGED TRANSACTION LEDGER DATA TO AUDIT:
+        {markdown_ledger}
+        
+        INSTRUCTIONS:
+        Exference the transaction ledger entries against the policy directory text above. 
+        Identify every account violating specific rules and extract the evidence.
+        Format your response EXACTLY like the following template, including specific account IDs:
         
         Specific Section Broken: RBI Section 4.1 (High-Value Cross-Border Transfers & PEP Multipliers)
-        Evidence: [Quote the exact text snippet from the text above]
+        Evidence: Account ACC_101 (Srinivasta Enterprises) is a PEP and processed transaction TX1008 to tax haven KY without senior management validation text clearance.
         
         Specific Section Broken: RBI Section 4.2 (KYC Compliance Thresholds & Restricted Accounts)
-        Evidence: [Quote the exact text snippet from the text above]
+        Evidence: Account ACC_202 (Anita Sharma) is a PEP operating with a 'Pending' KYC status while executing international cross-border transfers.
         
         Specific Section Broken: RBI Section 7.3 (Structural Anomalies & Velocity Structuring)
-        Evidence: [Quote the exact text snippet from the text above]
+        Evidence: Account ACC_991 (Alpha Global Holdings) processed multiple high-value transfers (TX1001, TX1003) to offshore entities inside a rolling 48-hour window.
         
         Specific Section Broken: RBI Section 9.4 (Standard Operating Procedure for Suspected Money Mule Accounts)
-        Evidence: [Quote the exact text snippet from the text above]
+        Evidence: Micro-mule accounts with suspended or pending statuses (ACC_303, ACC_606) executed transaction streams exceeding the ₹1,000 threshold.
         
-        Do not include any other conversational filler text or unflagged sections.
+        Do not include any conversational filler text or mention sections that have zero matching violations.
         """
         
         try:
