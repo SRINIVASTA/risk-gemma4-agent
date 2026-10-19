@@ -15,7 +15,7 @@ def render(engine):
     
     # 🔗 DYNAMIC LIVE DATA BRIDGE LAYER
     if "remediation_log" not in st.session_state or st.session_state["remediation_log"] is None:
-        # Step A: First attempt to load physical local storage files if they exist on a desktop drive
+        # Step A: Load physical local storage files if they exist on a desktop drive
         if os.path.exists(log_csv_path):
             try:
                 st.session_state["remediation_log"] = pd.read_csv(log_csv_path)
@@ -24,7 +24,7 @@ def render(engine):
         else:
             st.session_state["remediation_log"] = pd.DataFrame()
         
-        # Step B: Dynamic Real-time Calculation (Triggers automatically if log is missing or running on Web Cloud)
+        # Step B: Dynamic Real-time Calculation (Triggers if log is empty or missing)
         if st.session_state["remediation_log"].empty:
             init_records = []
             if not engine.acc_df.empty:
@@ -41,18 +41,18 @@ def render(engine):
                         "STATUS": "ACTIVE_ENFORCED"
                     })
             
-            # Instantly formulate clean, active runtime dataframe frames
+            # Formulate sequential dataframe structure instantly
             st.session_state["remediation_log"] = pd.DataFrame(init_records, columns=[
                 "TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "SYSTEMIC_LOCK_STATUS", "TRIGGER_RULE", "STATUS"
-            ])
+            ]).reset_index(drop=True)
             
-            # Persist locally to the filesystem ONLY if the user environment has open folder write privileges
+            # Persist locally to the filesystem if directory write privileges are available
             try:
                 if not os.path.exists(log_csv_path):
                     os.makedirs(os.path.dirname(log_csv_path), exist_ok=True)
                     st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
             except Exception:
-                pass # Gracefully handle web instance containers with blocked disk write paths
+                pass 
 
     st.subheader("🎯 Targeted Account Containment Protocols")
     c1, c2 = st.columns(2)
@@ -89,12 +89,12 @@ def render(engine):
         else:
             cust_name = engine.acc_df[engine.acc_df["ACCOUNT_ID"] == target_account]["CUSTOMER_NAME"].values[0]
             
-            # Mutate runtime in-memory parameters instantly
+            # Mutate runtime in-memory master variables instantly
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "SYSTEMIC_LOCK_STATUS"] = selected_protocol
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "OUTBOUND_OVERRIDE_ENABLED"] = "true" if selected_protocol == "UNLOCKED" else "false"
             engine.acc_df.loc[engine.acc_df["ACCOUNT_ID"] == target_account, "COMPLIANCE_REMARKS"] = compliance_justification if selected_protocol == "UNLOCKED" else "NA"
             
-            # Try updating the underlying backing tracking sheet files
+            # Save updates to the backing tracking sheet files
             try:
                 csv_target_path = getattr(engine, "acc_csv_path", "data/account_master.csv")
                 engine.acc_df.to_csv(csv_target_path, index=False)
@@ -114,7 +114,8 @@ def render(engine):
                 "STATUS": enforcement_status
             }
             
-            st.session_state["remediation_log"] = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
+            updated_df = pd.concat([st.session_state["remediation_log"], pd.DataFrame([new_log])], ignore_index=True)
+            st.session_state["remediation_log"] = updated_df.reset_index(drop=True)
             
             try:
                 st.session_state["remediation_log"].to_csv(log_csv_path, index=False)
@@ -207,7 +208,10 @@ def render(engine):
                 
         if new_violations:
             updated_log = pd.concat([st.session_state["remediation_log"], pd.DataFrame(new_violations)], ignore_index=True)
-            updated_log = updated_log.drop_duplicates(subset=['ACCOUNT_ID', 'TRIGGER_RULE'])
+            
+            # 🔄 CRITICAL REPAIR: Drops duplicate events AND explicitly resets row numbers sequentially (0 to 5)
+            updated_log = updated_log.drop_duplicates(subset=['ACCOUNT_ID', 'TRIGGER_RULE']).reset_index(drop=True)
+            
             st.session_state["remediation_log"] = updated_log
             try:
                 updated_log.to_csv(log_csv_path, index=False)
@@ -219,7 +223,10 @@ def render(engine):
     st.subheader("📋 Active Live REMEDIATION_LOG Table")
         
     if not st.session_state["remediation_log"].empty:
-        st.dataframe(st.session_state["remediation_log"].sort_values(by="TIMESTAMP", ascending=False), use_container_width=True)
+        st.dataframe(
+            st.session_state["remediation_log"].sort_values(by="TIMESTAMP", ascending=False), 
+            use_container_width=True
+        )
         if st.session_state.get("active_iam_user") == "SYSTEM_ADMIN":
             if st.button("🗑️ Wipe Remediation Audit Logs & Clear Engine Cache", type="secondary", use_container_width=True):
                 empty_log = pd.DataFrame(columns=["TIMESTAMP", "ACCOUNT_ID", "CUSTOMER_NAME", "ENFORCED_PROTOCOL", "SYSTEMIC_LOCK_STATUS", "TRIGGER_RULE", "STATUS"])
