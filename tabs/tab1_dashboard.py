@@ -70,7 +70,7 @@ def render(engine, min_threshold):
             # 🚨 LIVE PROTOCOL OVERRIDE: Fetch state directly from Tab 4 controls
             current_signoff = st.session_state.get('report_review_status', '⚠️ PENDING HUMAN SIGN-OFF BY COMPLIANCE OFFICER')
             
-            # 🛡️ FIXED: Removed manual duplication of Section 4 text block
+            # Formulate the single rendered layout view without manual duplication
             final_rendered_view = (
                 f"{report_markdown}\n\n"
                 "---\n"
@@ -136,6 +136,7 @@ def render(engine, min_threshold):
                             Paragraph(str(row.get("KYC_STATUS", row.get(status_col, "N/A"))), table_text_style)
                         ])
                     
+                    # Structural widths configuration matching the parent table grid matrix
                     t_widths = [50, 55, 130, 90, 45, 55, 65]
                     
                     pdf_table = Table(table_data, colWidths=t_widths, repeatRows=1)
@@ -149,15 +150,13 @@ def render(engine, min_threshold):
                     story.append(pdf_table)
                     story.append(Spacer(1, 15))
                     
-                    # 🔧 FIXED: Extracted and rendered the AI generated text block seamlessly for Section 4 inside the PDF flowables story pipeline
+                    # 🛡️ FIXED: Changed variable reference from 'ai_analysis_text' to 'report_markdown'
                     story.append(Paragraph("💡 4. RECOMMENDED COMPLIANCE ACTIONS", h2_style))
-                    if "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS" in ai_analysis_text:
-                        # Extract section text from the model generation directly to verify layout separation rules
-                        ai_recommendations = ai_analysis_text.split("## 💡 4. RECOMMENDED COMPLIANCE ACTIONS")[-1].strip()
+                    if "## 💡 4. RECOMMENDED COMPLIANCE ACTIONS" in report_markdown:
+                        ai_recommendations = report_markdown.split("## 💡 4. RECOMMENDED COMPLIANCE ACTIONS")[-1].strip()
                         ai_recommendations_cleaned = ai_recommendations.replace("\n", "<br/>")
                         story.append(Paragraph(ai_recommendations_cleaned, body_style))
                     else:
-                        # Fallback clean structure mapping
                         story.append(Paragraph("• <b>🛡️ Emergency Containment Protocol:</b> Immediately execute a targeted temporary debit hold for all Section 9.4 flagged mule accounts, limiting the hold to a strict maximum of 60 days.", body_style))
                         story.append(Paragraph("• <b>⏳ Time-Bound Resolution Protocol:</b> Initiate the time-bound resolution protocol: grant identified account holders a 20-day notification window to submit official justification documents.", body_style))
                         story.append(Paragraph("• <b>📤 External Regulatory Pipeline:</b> Route an urgent STR package to FIU-IND via the National Cyber Crime Reporting Portal (NCRP) interfaces within 30 days for confirmed mule identities.", body_style))
