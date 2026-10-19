@@ -6,83 +6,98 @@ import os
 import pandas as pd
 
 def generate_production_sandbox_datasets():
-    print("⏳ Initializing Standalone Decoupled Sandbox Dataset Generator...")
+    print("⏳ Initializing Standalone Sandbox Dataset Generator...")
     
     # Ensure target data subdirectory folder exists safely on the disk
     os.makedirs("data", exist_ok=True)
     
     # ─── PROFILE LOG DIRECTORY MATRIX (data/account_master.csv) ───
-    # 💡 100% PRODUCTION SECURED: Strictly parameter-driven with zero hardcoded code literals
     accounts_data = [
         {
             "ACCOUNT_ID": "ACC_991", "CUSTOMER_NAME": "Alpha Global Holdings", "KYC_STATUS": "Pending", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": False, "PAN": "PAN-ALPH991A", "GSTIN": "27ALPHA9911B1ZS", 
             "IEC_CODE": "IEC_9910042401", "TRADE_LICENSE": "LIC_991_ALPHA_HOUSE", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "14, Nariman Point, Cuffe Parade, Mumbai"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "14, Nariman Point, Cuffe Parade, Mumbai",
+            "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_112", "CUSTOMER_NAME": "Rajesh Kumar", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Individual", "IS_PEP": False, "PAN": "PAN-RAJE112K", "GSTIN": "N/A", 
             "IEC_CODE": "N/A", "TRADE_LICENSE": "N/A", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "45, MG Road, Connaught Place, New Delhi"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "45, MG Road, Connaught Place, New Delhi",
+            "SYSTEMIC_LOCK_STATUS": "UNLOCKED", "OUTBOUND_OVERRIDE_ENABLED": "true", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_445", "CUSTOMER_NAME": "Omega Trade Corp", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": False, "PAN": "PAN-OMEG445C", "GSTIN": "27OMEGA4452C1ZS", 
             "IEC_CODE": "IEC_4450098202", "TRADE_LICENSE": "LIC_445_OMEGA_CORP", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "88, IT Park, Electronic City, Bengaluru"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "88, IT Park, Electronic City, Bengaluru",
+            "SYSTEMIC_LOCK_STATUS": "UNLOCKED", "OUTBOUND_OVERRIDE_ENABLED": "true", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_101", "CUSTOMER_NAME": "Srinivasta Enterprises", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": True, "PAN": "PAN-SRIN101E", "GSTIN": "27SRINI1013A1ZS", 
             "IEC_CODE": "IEC_1010077703", "TRADE_LICENSE": "LIC_101_SRINI_HOUSE", "CURRENT_BALANCE": 45750000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "12, MVP Colony, Visakhapatnam, Andhra Pradesh"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "12, MVP Colony, Visakhapatnam, Andhra Pradesh",
+            "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_202", "CUSTOMER_NAME": "Anita Sharma", "KYC_STATUS": "Pending", 
             "CUSTOMER_TYPE": "Individual", "IS_PEP": True, "PAN": "PAN-ANIT202S", "GSTIN": "N/A", 
             "IEC_CODE": "N/A", "TRADE_LICENSE": "N/A", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "72, Jubilee Hills, Road No 3, Hyderabad"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "72, Jubilee Hills, Road No 3, Hyderabad",
+            "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_303", "CUSTOMER_NAME": "Zeta Logistics", "KYC_STATUS": "Suspended", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": False, "PAN": "PAN-ZETA303L", "GSTIN": "27ZETAL3034D1ZS", 
             "IEC_CODE": "IEC_3030012104", "TRADE_LICENSE": "LIC_303_ZETA_LOGS", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "5, Salt Lake Sector V, Kolkata"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "5, Salt Lake Sector V, Kolkata",
+            "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_505", "CUSTOMER_NAME": "Vikram Malhotra", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Individual", "IS_PEP": False, "PAN": "PAN-VIKR505M", "GSTIN": "N/A", 
             "IEC_CODE": "N/A", "TRADE_LICENSE": "N/A", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "104, Boat Club Road, Poona, Maharashtra"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "104, Boat Club Road, Poona, Maharashtra",
+            "SYSTEMIC_LOCK_STATUS": "UNLOCKED", "OUTBOUND_OVERRIDE_ENABLED": "true", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_606", "CUSTOMER_NAME": "Sigma Ventures", "KYC_STATUS": "Pending", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": False, "PAN": "PAN-SIGM606V", "GSTIN": "27SIGMA6065E1ZS", 
             "IEC_CODE": "IEC_6060033205", "TRADE_LICENSE": "LIC_606_SIGMA_VENT", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "31, Sector 17, Chandigarh, Punjab"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "31, Sector 17, Chandigarh, Punjab",
+            "SYSTEMIC_LOCK_STATUS": "ACTIVE_LOCK", "OUTBOUND_OVERRIDE_ENABLED": "false", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_707", "CUSTOMER_NAME": "Priya Patel", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Individual", "IS_PEP": False, "PAN": "PAN-PRIY707P", "GSTIN": "N/A", 
             "IEC_CODE": "N/A", "TRADE_LICENSE": "N/A", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "19, GIDC Industrial Estate, Vadodara, Gujarat"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "19, GIDC Industrial Estate, Vadodara, Gujarat",
+            "SYSTEMIC_LOCK_STATUS": "UNLOCKED", "OUTBOUND_OVERRIDE_ENABLED": "true", "COMPLIANCE_REMARKS": "NA"
         },
         {
             "ACCOUNT_ID": "ACC_808", "CUSTOMER_NAME": "Nexus Infotech", "KYC_STATUS": "Verified", 
             "CUSTOMER_TYPE": "Corporate", "IS_PEP": False, "PAN": "PAN-NEXU808I", "GSTIN": "27NEXUS8086F1ZS", 
             "IEC_CODE": "IEC_8080066106", "TRADE_LICENSE": "LIC_808_NEXUS_INFO", "CURRENT_BALANCE": 1250000, 
-            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "61, JN Road, Alwarpet, Chennai, Tamil Nadu"
+            "AD_BANK": "State Bank of India", "PERMANENT_ADDRESS": "61, JN Road, Alwarpet, Chennai, Tamil Nadu",
+            "SYSTEMIC_LOCK_STATUS": "UNLOCKED", "OUTBOUND_OVERRIDE_ENABLED": "true", "COMPLIANCE_REMARKS": "NA"
         }
     ]
     pd.DataFrame(accounts_data).to_csv("data/account_master.csv", index=False)
-    print("✅ Rebuilt account_master.csv cleanly with 10 decoupled parameter profiles.")
+    print("✅ Rebuilt account_master.csv cleanly with unified Snowflake schemas.")
     # =====================================================================
     # ─── RISK-GEMMA4-AGENT: AUTOMATED DATA SIMULATOR ENGINE (PART 2) ────
     # ─── POPULATES COMPREHENSIVE HISTORICAL RAW TRANSACTION HISTORIES ────
     # =====================================================================
-    # Standalone array block matching the exact chronological log lines of your platform
     ledger_entries = [
+        # 🚨 NEW VIOLATION TARGET VECTORS: Injected to fulfill Rule 1 (Sanctioned Countries Auto-Freeze)
+        {"TRANSACTION_ID": "TX9001", "ACCOUNT_ID": "ACC_303", "AMOUNT": 520000, "COUNTRY_CODE": "KP", "TIMESTAMP": "2026-10-19 09:00:00"},
+        {"TRANSACTION_ID": "TX9002", "ACCOUNT_ID": "ACC_606", "AMOUNT": 890000, "COUNTRY_CODE": "IR", "TIMESTAMP": "2026-10-19 09:15:00"},
+        {"TRANSACTION_ID": "TX9003", "ACCOUNT_ID": "ACC_991", "AMOUNT": 145000, "COUNTRY_CODE": "MM", "TIMESTAMP": "2026-10-19 09:30:00"},
+        {"TRANSACTION_ID": "TX9004", "ACCOUNT_ID": "ACC_112", "AMOUNT": 310000, "COUNTRY_CODE": "SY", "TIMESTAMP": "2026-10-19 10:10:00"},
+        
+        # 👥 ORIGINAL HISTORICAL ENTRIES: Completely retained without modification
         {"TRANSACTION_ID": "TX1001", "ACCOUNT_ID": "ACC_991", "AMOUNT": 7500000, "COUNTRY_CODE": "KY", "TIMESTAMP": "2026-09-15 14:22:00"},
         {"TRANSACTION_ID": "TX1002", "ACCOUNT_ID": "ACC_112", "AMOUNT": 120000, "COUNTRY_CODE": "IN", "TIMESTAMP": "2026-09-15 15:30:00"},
         {"TRANSACTION_ID": "TX1003", "ACCOUNT_ID": "ACC_991", "AMOUNT": 6200000, "COUNTRY_CODE": "CH", "TIMESTAMP": "2026-09-16 09:11:00"},
@@ -109,7 +124,6 @@ def generate_production_sandbox_datasets():
         {"TRANSACTION_ID": "TX1024", "ACCOUNT_ID": "ACC_202", "AMOUNT": 37603, "COUNTRY_CODE": "CH", "TIMESTAMP": "2026-09-17 19:41:00"},
         {"TRANSACTION_ID": "TX1025", "ACCOUNT_ID": "ACC_505", "AMOUNT": 153969, "COUNTRY_CODE": "SG", "TIMESTAMP": "2026-09-17 20:47:00"},
         {"TRANSACTION_ID": "TX1026", "ACCOUNT_ID": "ACC_445", "AMOUNT": 8598432, "COUNTRY_CODE": "US", "TIMESTAMP": "2026-09-17 21:09:00"},
-        {"TRANSACTION_ID": "TRANSACTION_ID", "ACCOUNT_ID": "ACCOUNT_ID", "AMOUNT": 0, "COUNTRY_CODE": "IN", "TIMESTAMP": "2026-09-17 21:09:00"}, # Schema marker row placeholder
         {"TRANSACTION_ID": "TX1027", "ACCOUNT_ID": "ACC_112", "AMOUNT": 41066, "COUNTRY_CODE": "UK", "TIMESTAMP": "2026-09-17 23:07:00"},
         {"TRANSACTION_ID": "TX1028", "ACCOUNT_ID": "ACC_808", "AMOUNT": 1115818, "COUNTRY_CODE": "HK", "TIMESTAMP": "2026-09-18 01:32:00"},
         {"TRANSACTION_ID": "TX1029", "ACCOUNT_ID": "ACC_202", "AMOUNT": 146024, "COUNTRY_CODE": "US", "TIMESTAMP": "2026-09-18 03:59:00"},
@@ -136,11 +150,7 @@ def generate_production_sandbox_datasets():
         {"TRANSACTION_ID": "TX1050", "ACCOUNT_ID": "ACC_101", "AMOUNT": 3264348, "COUNTRY_CODE": "HK", "TIMESTAMP": "2026-09-19 18:41:00"}
     ]
     
-    # Filter out empty marker validation elements cleanly before printing to disk
-    tx_clean_df = pd.DataFrame(ledger_entries)
-    tx_clean_df = tx_clean_df[tx_clean_df["TRANSACTION_ID"] != "TRANSACTION_ID"]
-    
-    tx_clean_df.to_csv("data/transaction_ledger.csv", index=False)
+    pd.DataFrame(ledger_entries).to_csv("data/transaction_ledger.csv", index=False)
     print("✅ Rebuilt transaction_ledger.csv natively with active core audit logs.")
     print("🏁 [SUCCESS] Standalone testing datasets are completely synchronized.")
 
