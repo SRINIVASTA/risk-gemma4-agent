@@ -146,19 +146,13 @@ A common critique of large-scale open reasoning models like Gemma 4 is inference
 
 ---
 
-## 🚀 Quick Start Deployment Guide
-
-### 1. Provision Local Virtual Environment Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Set Up Environment Workspace Keys
-```bash
-export GOOGLE_API_KEY="your-gemini-api-key-from-google-ai-studio"
-```
-
-### 3. Launch the Streamlit Terminal Instance
-```bash
-streamlit run app.py
-```
+## 🛠️ Quick Start via Docker
+1. Build the container image:
+   ```bash
+   docker build -t risk-gemma4-agent .
+   ```
+2. Launch the instance:
+   ```bash
+   docker run -d -p 8501:8501 -e GOOGLE_API_KEY="your-key" risk-gemma4-agent
+   ```
+3. Access the workspace at: **http://localhost:8501/**
