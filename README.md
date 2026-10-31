@@ -156,3 +156,5 @@ A common critique of large-scale open reasoning models like Gemma 4 is inference
    docker run -d -p 8501:8501 -e GOOGLE_API_KEY="your-key" risk-gemma4-agent
    ```
 3. Access the workspace at: **http://localhost:8501/**
+
+ # Hacktoberfest 2026 Submission
